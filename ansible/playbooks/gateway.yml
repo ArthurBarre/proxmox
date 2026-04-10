@@ -1,0 +1,6 @@
+---
+- name: Configure Traefik reverse proxy
+  hosts: gateway
+  become: true
+  roles:
+    - traefik

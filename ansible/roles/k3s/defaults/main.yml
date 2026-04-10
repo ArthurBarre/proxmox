@@ -1,0 +1,19 @@
+---
+k3s_version: "v1.34.0+k3s1"
+k3s_role: server  # server ou agent
+
+# On désactive le Traefik intégré car on utilise celui de la VM gateway
+k3s_disable:
+  - traefik
+  - servicelb
+
+# K3s API accessible via Tailscale
+k3s_tls_san:
+  - "100.78.207.119"  # Tailscale IP du k3s-master
+  - "10.10.10.5"      # IP privée
+
+k3s_node_ip: "10.10.10.5"
+
+# Pour les workers
+k3s_server_url: "https://10.10.10.5:6443"
+k3s_token: ""  # Récupéré du server après install

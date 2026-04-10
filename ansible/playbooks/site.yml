@@ -1,0 +1,7 @@
+# Master playbook — provisionne toute l'infra
+---
+- import_playbook: base.yml
+- import_playbook: gateway.yml
+- import_playbook: db.yml
+- import_playbook: docker.yml
+- import_playbook: k3s.yml

@@ -1,0 +1,16 @@
+---
+postgresql_version: "15"
+postgresql_data_dir: "/var/lib/postgresql/{{ postgresql_version }}/main"
+postgresql_listen_addresses: "10.10.10.3,localhost"
+postgresql_port: 5432
+postgresql_max_connections: 100
+
+# Réseaux autorisés (réseau privé Proxmox uniquement)
+postgresql_allowed_networks:
+  - "10.10.10.0/24"
+  - "100.64.0.0/10"  # Tailscale CGNAT range
+
+# Backups
+postgresql_backup_enabled: true
+postgresql_backup_dir: /var/backups/postgresql
+postgresql_backup_retention_days: 7

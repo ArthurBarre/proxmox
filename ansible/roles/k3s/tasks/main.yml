@@ -1,0 +1,46 @@
+---
+- name: Install K3s server
+  shell: |
+    curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="{{ k3s_version }}" sh -s - server \
+      --node-ip {{ k3s_node_ip }} \
+      --tls-san {{ k3s_tls_san | join(',') }} \
+      --disable {{ k3s_disable | join(' --disable ') }} \
+      --write-kubeconfig-mode 644
+  args:
+    creates: /usr/local/bin/k3s
+  when: k3s_role == "server"
+
+- name: Install K3s agent
+  shell: |
+    curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="{{ k3s_version }}" K3S_URL="{{ k3s_server_url }}" K3S_TOKEN="{{ k3s_token }}" sh -s - agent \
+      --node-ip {{ k3s_node_ip }}
+  args:
+    creates: /usr/local/bin/k3s
+  when: k3s_role == "agent"
+
+- name: Wait for K3s to be ready
+  command: k3s kubectl get nodes
+  register: k3s_nodes
+  retries: 10
+  delay: 5
+  until: k3s_nodes.rc == 0
+  when: k3s_role == "server"
+
+- name: Fetch kubeconfig
+  fetch:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: "{{ playbook_dir }}/../../k3s/kubeconfig.yaml"
+    flat: yes
+  when: k3s_role == "server"
+
+- name: Create kubectl alias for arthur
+  lineinfile:
+    path: /home/arthur/.bashrc
+    line: 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml'
+    create: yes
+
+- name: Install Helm
+  shell: curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+  args:
+    creates: /usr/local/bin/helm
+  when: k3s_role == "server"

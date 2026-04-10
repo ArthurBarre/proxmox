@@ -1,0 +1,37 @@
+# Managed by Ansible — traefik.yml (static config)
+log:
+  level: {{ traefik_log_level }}
+  filePath: /var/log/traefik/traefik.log
+
+accessLog:
+  filePath: /var/log/traefik/access.log
+
+api:
+  dashboard: true
+  insecure: false
+
+entryPoints:
+  web:
+    address: ":{{ traefik_http_port }}"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+  websecure:
+    address: ":{{ traefik_https_port }}"
+  traefik:
+    address: "{{ traefik_dashboard_entrypoint }}"
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: {{ traefik_acme_email }}
+      storage: {{ traefik_config_dir }}/acme.json
+      httpChallenge:
+        entryPoint: web
+
+providers:
+  file:
+    directory: {{ traefik_config_dir }}/dynamic
+    watch: true

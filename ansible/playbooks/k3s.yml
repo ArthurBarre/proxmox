@@ -1,0 +1,6 @@
+---
+- name: Configure K3s cluster
+  hosts: k3s_masters
+  become: true
+  roles:
+    - k3s

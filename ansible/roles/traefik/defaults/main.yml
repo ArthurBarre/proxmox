@@ -1,0 +1,14 @@
+---
+traefik_version: "3.4"
+traefik_install_dir: /opt/traefik
+traefik_config_dir: /etc/traefik
+traefik_acme_email: "arthurbarre.js@gmail.com"
+traefik_log_level: "INFO"
+
+# Ports
+traefik_http_port: 80
+traefik_https_port: 443
+traefik_dashboard_port: 8080
+
+# Dashboard accessible uniquement via Tailscale
+traefik_dashboard_entrypoint: "100.106.59.13:{{ traefik_dashboard_port }}"

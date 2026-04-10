@@ -1,0 +1,32 @@
+# /etc/network/interfaces — Proxmox host (51.38.62.199)
+# Référence uniquement — le fichier réel est sur le host
+
+auto lo
+iface lo inet loopback
+
+# Bridge public (IP OVH)
+auto vmbr0
+iface vmbr0 inet static
+    address 51.38.62.199/24
+    gateway 51.38.62.254
+    bridge-ports eno1
+    bridge-stp off
+    bridge-fd 0
+
+# Bridge privé (réseau interne VMs)
+auto vmbr1
+iface vmbr1 inet static
+    address 10.10.10.1/24
+    bridge-ports none
+    bridge-stp off
+    bridge-fd 0
+
+    # NAT : les VMs accèdent à internet via le host
+    post-up   iptables -t nat -A POSTROUTING -s 10.10.10.0/24 -o vmbr0 -j MASQUERADE
+    post-down iptables -t nat -D POSTROUTING -s 10.10.10.0/24 -o vmbr0 -j MASQUERADE
+
+    # Forwarding HTTP/HTTPS vers la VM gateway (Traefik)
+    post-up   iptables -t nat -A PREROUTING -i vmbr0 -p tcp --dport 80  -j DNAT --to 10.10.10.2:80
+    post-up   iptables -t nat -A PREROUTING -i vmbr0 -p tcp --dport 443 -j DNAT --to 10.10.10.2:443
+    post-down iptables -t nat -D PREROUTING -i vmbr0 -p tcp --dport 80  -j DNAT --to 10.10.10.2:80
+    post-down iptables -t nat -D PREROUTING -i vmbr0 -p tcp --dport 443 -j DNAT --to 10.10.10.2:443

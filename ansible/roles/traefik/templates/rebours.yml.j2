@@ -1,0 +1,29 @@
+# Dynamic config — rebours.studio
+http:
+  routers:
+    rebours-web:
+      rule: "Host(`rebours.studio`)"
+      entryPoints:
+        - websecure
+      service: rebours-nginx
+      tls:
+        certResolver: letsencrypt
+
+    rebours-api:
+      rule: "Host(`rebours.studio`) && PathPrefix(`/api`)"
+      entryPoints:
+        - websecure
+      service: rebours-api
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    rebours-nginx:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.4:8080"
+
+    rebours-api:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.4:3000"

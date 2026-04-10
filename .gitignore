@@ -1,0 +1,31 @@
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/*.tfplan
+terraform/terraform.tfvars
+terraform/.terraform.lock.hcl
+
+# Ansible
+ansible/*.retry
+ansible/inventory/hosts.yml
+
+# Secrets
+*.pem
+*.key
+.env
+secrets/
+**/tailscale-authkey
+**/stripe-*
+**/password*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

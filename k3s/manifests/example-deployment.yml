@@ -1,0 +1,44 @@
+# Exemple de déploiement sur K3s
+# Le trafic arrive via Traefik (VM gateway) → NodePort → Pod
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-app
+  namespace: apps
+  labels:
+    app: example-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: example-app
+  template:
+    metadata:
+      labels:
+        app: example-app
+    spec:
+      containers:
+        - name: app
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "250m"
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: example-app
+  namespace: apps
+spec:
+  type: ClusterIP
+  selector:
+    app: example-app
+  ports:
+    - port: 80
+      targetPort: 80

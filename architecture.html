@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture Proxmox — Arthur</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    background: #0a0a0a;
+    color: #e0e0e0;
+    font-family: 'Space Mono', monospace;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+  
+  h1 {
+    text-align: center;
+    font-size: 1.1rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+  
+  .subtitle {
+    text-align: center;
+    font-size: 0.7rem;
+    color: #666;
+    letter-spacing: 0.2em;
+    margin-bottom: 50px;
+  }
+  
+  .diagram {
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+  }
+  
+  /* Host container */
+  .host {
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 30px 24px 24px;
+    position: relative;
+    background: linear-gradient(180deg, #111 0%, #0a0a0a 100%);
+  }
+  
+  .host-label {
+    position: absolute;
+    top: -10px;
+    left: 24px;
+    background: #0a0a0a;
+    padding: 0 12px;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: #888;
+    text-transform: uppercase;
+  }
+  
+  /* Host header */
+  .host-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #1a1a1a;
+  }
+  
+  .host-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .host-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+  }
+  
+  .host-name { font-size: 0.85rem; font-weight: 700; color: #fff; }
+  .host-specs { font-size: 0.6rem; color: #555; margin-top: 2px; }
+  
+  .host-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  
+  .badge {
+    font-size: 0.55rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  
+  .badge-ip { background: #1a1a2e; color: #7b8cde; border: 1px solid #2a2a4e; }
+  .badge-ts { background: #1a2e1a; color: #7bde8c; border: 1px solid #2a4e2a; }
+  .badge-net { background: #2e1a1a; color: #de7b7b; border: 1px solid #4e2a2a; }
+  
+  /* Network bars */
+  .networks {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  
+  .net-bar {
+    flex: 1;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .net-vmbr0 { background: #1a1a2e; border: 1px solid #2a2a4e; }
+  .net-vmbr1 { background: #1e1a2e; border: 1px solid #3a2a5e; }
+  .net-tailscale { background: #1a2e1a; border: 1px solid #2a4e2a; }
+  
+  .net-name { color: #aaa; letter-spacing: 0.1em; }
+  .net-detail { color: #555; }
+  
+  /* VM Grid */
+  .vm-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  
+  @media (max-width: 800px) {
+    .vm-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  
+  .vm {
+    border: 1px solid #222;
+    border-radius: 10px;
+    padding: 16px;
+    background: #111;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  
+  .vm:hover { border-color: #444; }
+  
+  .vm-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  
+  .vm-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4ade80;
+    box-shadow: 0 0 6px #4ade8066;
+    flex-shrink: 0;
+  }
+  
+  .vm-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  
+  .vm-id {
+    font-size: 0.55rem;
+    color: #444;
+    margin-left: auto;
+  }
+  
+  .vm-service {
+    font-size: 0.6rem;
+    color: #888;
+    margin-bottom: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid #1a1a1a;
+  }
+  
+  .vm-service em {
+    font-style: normal;
+    color: #bbb;
+  }
+  
+  .vm-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  
+  .tag {
+    font-size: 0.5rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    letter-spacing: 0.05em;
+  }
+  
+  .tag-purple { background: #2a1a3e; color: #c084fc; }
+  .tag-blue { background: #1a1a3e; color: #7b9cde; }
+  .tag-green { background: #1a2e1a; color: #7bde8c; }
+  .tag-orange { background: #2e2a1a; color: #deb87b; }
+  
+  .vm-ips {
+    font-size: 0.55rem;
+    color: #555;
+    line-height: 1.6;
+  }
+  
+  .vm-ips span { color: #777; }
+  
+  /* Traffic flow */
+  .flow {
+    border: 1px solid #1a1a1a;
+    border-radius: 10px;
+    padding: 20px;
+    background: #0d0d0d;
+    margin-bottom: 24px;
+  }
+  
+  .flow-title {
+    font-size: 0.6rem;
+    color: #555;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  
+  .flow-steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .flow-step {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.6rem;
+    white-space: nowrap;
+  }
+  
+  .flow-internet { background: #2e2a1a; color: #deb87b; }
+  .flow-host { background: #1a1a2e; color: #7b8cde; }
+  .flow-gateway { background: #2a1a3e; color: #c084fc; }
+  .flow-app { background: #1a2e1a; color: #7bde8c; }
+  
+  .flow-arrow {
+    color: #333;
+    font-size: 0.7rem;
+    padding: 0 6px;
+  }
+  
+  /* Template */
+  .template-section {
+    border: 1px dashed #222;
+    border-radius: 10px;
+    padding: 16px;
+    background: #0d0d0d;
+    margin-bottom: 24px;
+  }
+  
+  .template-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  
+  .template-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #555;
+    flex-shrink: 0;
+  }
+  
+  .template-title {
+    font-size: 0.65rem;
+    color: #666;
+    letter-spacing: 0.1em;
+  }
+  
+  .template-desc {
+    font-size: 0.55rem;
+    color: #444;
+    padding-left: 18px;
+  }
+  
+  /* IaC section */
+  .iac {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  
+  @media (max-width: 600px) {
+    .iac { grid-template-columns: 1fr; }
+  }
+  
+  .iac-box {
+    border: 1px solid #1a1a1a;
+    border-radius: 10px;
+    padding: 16px;
+    background: #0d0d0d;
+  }
+  
+  .iac-title {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #aaa;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .iac-desc {
+    font-size: 0.55rem;
+    color: #555;
+    line-height: 1.8;
+  }
+  
+  /* Site badge */
+  .site-live {
+    text-align: center;
+    margin-top: 30px;
+    padding: 14px;
+    border: 1px solid #2a4e2a;
+    border-radius: 8px;
+    background: #0d150d;
+  }
+  
+  .site-live a {
+    color: #4ade80;
+    text-decoration: none;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+  }
+  
+  .site-live .live-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4ade80;
+    margin-right: 8px;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Proxmox Infrastructure</h1>
+<p class="subtitle">OVH Dédié — Xeon E-2236 · 32 Go RAM · 2× NVMe 480 Go RAID1</p>
+
+<div class="diagram">
+  <div class="host">
+    <span class="host-label">Proxmox VE 9.1 — ns3142338</span>
+    
+    <div class="host-header">
+      <div class="host-info">
+        <div class="host-icon">⬡</div>
+        <div>
+          <div class="host-name">proxmox</div>
+          <div class="host-specs">Debian 13 (trixie) · ZFS · 430 Go dispo</div>
+        </div>
+      </div>
+      <div class="host-badges">
+        <span class="badge badge-ip">51.38.62.199</span>
+        <span class="badge badge-ts">tailscale 100.78.114.17</span>
+        <span class="badge badge-net">subnet router 10.10.10.0/24</span>
+      </div>
+    </div>
+    
+    <!-- Networks -->
+    <div class="networks">
+      <div class="net-bar net-vmbr0">
+        <span class="net-name">vmbr0</span>
+        <span class="net-detail">bridge public · eno1 · 51.38.62.199/24</span>
+      </div>
+      <div class="net-bar net-vmbr1">
+        <span class="net-name">vmbr1</span>
+        <span class="net-detail">bridge privé · NAT · 10.10.10.1/24</span>
+      </div>
+      <div class="net-bar net-tailscale">
+        <span class="net-name">tailscale</span>
+        <span class="net-detail">mesh VPN · 100.x.x.x · MagicDNS</span>
+      </div>
+    </div>
+    
+    <!-- VM Grid -->
+    <div class="vm-grid">
+      
+      <div class="vm">
+        <div class="vm-header">
+          <div class="vm-dot"></div>
+          <div class="vm-title">gateway</div>
+          <div class="vm-id">VM 100</div>
+        </div>
+        <div class="vm-service"><em>Traefik v3.4</em> — reverse proxy</div>
+        <div class="vm-tags">
+          <span class="tag tag-purple">HTTPS</span>
+          <span class="tag tag-purple">Let's Encrypt</span>
+          <span class="tag tag-blue">1 core</span>
+          <span class="tag tag-blue">1 Go</span>
+        </div>
+        <div class="vm-ips">
+          <span>priv</span> 10.10.10.2<br>
+          <span>ts</span> 100.106.59.13<br>
+          <span>ports</span> :80 :443 → internet
+        </div>
+      </div>
+      
+      <div class="vm">
+        <div class="vm-header">
+          <div class="vm-dot"></div>
+          <div class="vm-title">docker</div>
+          <div class="vm-id">VM 102</div>
+        </div>
+        <div class="vm-service"><em>Docker 29.4</em> + Compose</div>
+        <div class="vm-tags">
+          <span class="tag tag-green">rebours.studio</span>
+          <span class="tag tag-orange">Uptime Kuma</span>
+          <span class="tag tag-blue">2 cores</span>
+          <span class="tag tag-blue">4 Go</span>
+        </div>
+        <div class="vm-ips">
+          <span>priv</span> 10.10.10.4<br>
+          <span>ts</span> 100.79.77.93<br>
+          <span>apps</span> :8080 (nginx) · :3001 (monitoring)
+        </div>
+      </div>
+      
+      <div class="vm">
+        <div class="vm-header">
+          <div class="vm-dot"></div>
+          <div class="vm-title">db</div>
+          <div class="vm-id">VM 101</div>
+        </div>
+        <div class="vm-service"><em>PostgreSQL 15</em></div>
+        <div class="vm-tags">
+          <span class="tag tag-purple">réseau privé only</span>
+          <span class="tag tag-blue">2 cores</span>
+          <span class="tag tag-blue">2 Go</span>
+        </div>
+        <div class="vm-ips">
+          <span>priv</span> 10.10.10.3<br>
+          <span>ts</span> 100.114.242.60<br>
+          <span>port</span> :5432 (interne)
+        </div>
+      </div>
+      
+      <div class="vm">
+        <div class="vm-header">
+          <div class="vm-dot"></div>
+          <div class="vm-title">k3s-master</div>
+          <div class="vm-id">VM 103</div>
+        </div>
+        <div class="vm-service"><em>K3s v1.34</em> — Kubernetes</div>
+        <div class="vm-tags">
+          <span class="tag tag-purple">control plane</span>
+          <span class="tag tag-blue">2 cores</span>
+          <span class="tag tag-blue">4 Go</span>
+        </div>
+        <div class="vm-ips">
+          <span>priv</span> 10.10.10.5<br>
+          <span>ts</span> 100.78.207.119<br>
+          <span>api</span> :6443 (kubectl)
+        </div>
+      </div>
+      
+    </div>
+    
+    <!-- Traffic flow -->
+    <div class="flow">
+      <div class="flow-title">flux du trafic web — rebours.studio</div>
+      <div class="flow-steps">
+        <div class="flow-step flow-internet">Internet :443</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step flow-host">iptables DNAT</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step flow-gateway">Traefik (TLS)</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step flow-app">Nginx :8080</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step flow-app">Fastify :3000</div>
+      </div>
+    </div>
+
+    <!-- Template -->
+    <div class="template-section">
+      <div class="template-header">
+        <div class="template-dot"></div>
+        <div class="template-title">TEMPLATE 9000 — debian12-template</div>
+      </div>
+      <div class="template-desc">
+        Debian 12 Bookworm · cloud-init · 20 Go · clé SSH arthur · clonable via Terraform ou qm clone
+      </div>
+    </div>
+    
+    <!-- IaC -->
+    <div class="iac">
+      <div class="iac-box">
+        <div class="iac-title">⬡ Terraform</div>
+        <div class="iac-desc">
+          Provider bpg/proxmox<br>
+          API token: terraform@pve<br>
+          /root/infra/terraform/<br>
+          → terraform apply pour créer des VMs
+        </div>
+      </div>
+      <div class="iac-box">
+        <div class="iac-title">▷ Ansible</div>
+        <div class="iac-desc">
+          Roles: common, traefik, docker, k3s, postgresql<br>
+          Inventaire: 4 VMs<br>
+          /root/infra/ansible/<br>
+          → ansible-playbook site.yml
+        </div>
+      </div>
+    </div>
+    
+    <div class="site-live">
+      <a href="https://rebours.studio" target="_blank">
+        <span class="live-dot"></span>REBOURS.STUDIO — LIVE
+      </a>
+    </div>
+    
+  </div>
+</div>
+
+</body>
+</html>

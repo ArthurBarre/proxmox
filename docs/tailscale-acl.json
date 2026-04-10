@@ -1,0 +1,38 @@
+{
+  "// Note": "À copier dans la console Tailscale admin → Access controls",
+  "// URL": "https://login.tailscale.com/admin/acls",
+
+  "acls": [
+    {
+      "// comment": "Arthur a accès à tout",
+      "action": "accept",
+      "src": ["arthur@github"],
+      "dst": ["*:*"]
+    },
+    {
+      "// comment": "Les serveurs communiquent entre eux",
+      "action": "accept",
+      "src": ["tag:server"],
+      "dst": ["tag:server:*"]
+    }
+  ],
+
+  "tagOwners": {
+    "tag:server": ["arthur@github"]
+  },
+
+  "ssh": [
+    {
+      "action": "accept",
+      "src": ["arthur@github"],
+      "dst": ["tag:server"],
+      "users": ["arthur", "root"]
+    }
+  ],
+
+  "autoApprovers": {
+    "routes": {
+      "10.10.10.0/24": ["tag:server"]
+    }
+  }
+}

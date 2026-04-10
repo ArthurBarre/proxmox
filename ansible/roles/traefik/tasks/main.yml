@@ -1,0 +1,63 @@
+---
+- name: Create Traefik directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ traefik_install_dir }}"
+    - "{{ traefik_config_dir }}"
+    - "{{ traefik_config_dir }}/dynamic"
+    - /var/log/traefik
+
+- name: Download Traefik binary
+  get_url:
+    url: "https://github.com/traefik/traefik/releases/download/v{{ traefik_version }}.0/traefik_v{{ traefik_version }}.0_linux_amd64.tar.gz"
+    dest: /tmp/traefik.tar.gz
+    mode: "0644"
+
+- name: Extract Traefik
+  unarchive:
+    src: /tmp/traefik.tar.gz
+    dest: "{{ traefik_install_dir }}"
+    remote_src: yes
+    creates: "{{ traefik_install_dir }}/traefik"
+
+- name: Symlink Traefik to /usr/local/bin
+  file:
+    src: "{{ traefik_install_dir }}/traefik"
+    dest: /usr/local/bin/traefik
+    state: link
+
+- name: Create Traefik static config
+  template:
+    src: traefik.yml.j2
+    dest: "{{ traefik_config_dir }}/traefik.yml"
+    mode: "0644"
+  notify: restart traefik
+
+- name: Create ACME storage file
+  file:
+    path: "{{ traefik_config_dir }}/acme.json"
+    state: touch
+    mode: "0600"
+
+- name: Deploy rebours.studio dynamic config
+  template:
+    src: rebours.yml.j2
+    dest: "{{ traefik_config_dir }}/dynamic/rebours.yml"
+    mode: "0644"
+
+- name: Create Traefik systemd service
+  template:
+    src: traefik.service.j2
+    dest: /etc/systemd/system/traefik.service
+    mode: "0644"
+  notify: restart traefik
+
+- name: Enable and start Traefik
+  systemd:
+    name: traefik
+    enabled: true
+    state: started
+    daemon_reload: true

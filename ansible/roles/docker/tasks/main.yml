@@ -1,0 +1,68 @@
+---
+- name: Install Docker prerequisites
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+    state: present
+
+- name: Add Docker GPG key
+  shell: |
+    install -m 0755 -d /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+    chmod a+r /etc/apt/keyrings/docker.asc
+  args:
+    creates: /etc/apt/keyrings/docker.asc
+
+- name: Add Docker repository
+  shell: |
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo $VERSION_CODENAME) stable" > /etc/apt/sources.list.d/docker.list
+  args:
+    creates: /etc/apt/sources.list.d/docker.list
+
+- name: Install Docker CE
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+    update_cache: yes
+
+- name: Add user to docker group
+  user:
+    name: "{{ docker_user }}"
+    groups: docker
+    append: yes
+
+- name: Enable Docker
+  systemd:
+    name: docker
+    enabled: true
+    state: started
+
+- name: Create app directories
+  file:
+    path: "/opt/{{ item }}"
+    state: directory
+    owner: "{{ docker_user }}"
+    mode: "0755"
+  loop: "{{ docker_services }}"
+
+- name: Deploy rebours docker-compose
+  template:
+    src: rebours-compose.yml.j2
+    dest: /opt/rebours/docker-compose.yml
+    owner: "{{ docker_user }}"
+    mode: "0644"
+
+- name: Deploy monitoring docker-compose
+  template:
+    src: monitoring-compose.yml.j2
+    dest: /opt/monitoring/docker-compose.yml
+    owner: "{{ docker_user }}"
+    mode: "0644"

@@ -1,0 +1,42 @@
+# Copier en hosts.yml et adapter les IPs Tailscale
+# cp hosts.yml.example hosts.yml
+---
+all:
+  vars:
+    ansible_user: arthur
+    ansible_become: true
+    tailscale_auth_key: "tskey-auth-CHANGE_ME"
+
+  children:
+    gateway:
+      hosts:
+        gateway:
+          ansible_host: 100.106.59.13  # Tailscale IP
+          private_ip: 10.10.10.2
+
+    databases:
+      hosts:
+        db:
+          ansible_host: 100.114.242.60
+          private_ip: 10.10.10.3
+          postgresql_version: "15"
+
+    docker_hosts:
+      hosts:
+        docker:
+          ansible_host: 100.79.77.93
+          private_ip: 10.10.10.4
+
+    k3s_masters:
+      hosts:
+        k3s-master:
+          ansible_host: 100.78.207.119
+          private_ip: 10.10.10.5
+          k3s_role: server
+
+    # k3s_workers:
+    #   hosts:
+    #     k3s-worker-1:
+    #       ansible_host: 100.x.x.x
+    #       private_ip: 10.10.10.6
+    #       k3s_role: agent

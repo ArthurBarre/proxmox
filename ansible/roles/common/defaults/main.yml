@@ -1,0 +1,27 @@
+---
+# Paquets de base installés sur chaque VM
+common_packages:
+  - curl
+  - wget
+  - vim
+  - htop
+  - git
+  - ufw
+  - unattended-upgrades
+  - apt-transport-https
+  - ca-certificates
+  - gnupg
+  - qemu-guest-agent
+  - fail2ban
+
+# Tailscale
+tailscale_auth_key: "{{ lookup('env', 'TAILSCALE_AUTH_KEY') | default('') }}"
+tailscale_extra_args: "--ssh"
+
+# SSH hardening
+ssh_permit_root_login: "prohibit-password"
+ssh_password_auth: "no"
+ssh_max_auth_tries: 3
+
+# Timezone
+timezone: "Europe/Paris"
