@@ -53,13 +53,6 @@
     mode: "0755"
   loop: "{{ docker_services }}"
 
-- name: Deploy rebours docker-compose
-  template:
-    src: rebours-compose.yml.j2
-    dest: /opt/rebours/docker-compose.yml
-    owner: "{{ docker_user }}"
-    mode: "0644"
-
 - name: Deploy monitoring docker-compose
   template:
     src: monitoring-compose.yml.j2

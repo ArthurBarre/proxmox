@@ -7,7 +7,7 @@
 | 10.10.10.1 | proxmox | Hyperviseur (host) | — | 100.78.114.17 |
 | 10.10.10.2 | gateway | Traefik v3.4 (reverse proxy) | 100 | 100.106.59.13 |
 | 10.10.10.3 | db | PostgreSQL 15 | 101 | 100.114.242.60 |
-| 10.10.10.4 | docker | Docker host (rebours.studio, monitoring) | 102 | 100.79.77.93 |
+| 10.10.10.4 | docker | Docker host (monitoring) | 102 | 100.79.77.93 |
 | 10.10.10.5 | k3s-master | K3s control plane | 103 | 100.78.207.119 |
 | 10.10.10.6 | k3s-worker | K3s worker + Docker pour Act Runner | 104 | — |
 | 10.10.10.7-9 | k3s-worker-N | K3s workers additionnels (réservé) | 105-107 | — |
@@ -34,6 +34,7 @@
 | 30080 | k3s (NodePort) | Gitea |
 | 30081 | k3s (NodePort) | Douzoute |
 | 30082 | k3s (NodePort) | Freedge |
+| 30083 | k3s (NodePort) | Rebours |
 | 8082 | docker | arthurbarre.fr (portfolio legacy) |
 | 9000-9001 | docker | MinIO (usage interne / admin) |
 
@@ -55,7 +56,7 @@ Lors du déploiement d'un nouveau service, le skill doit demander (via `AskUserQ
 
 | Domaine | Service | Cible |
 |---|---|---|
-| `rebours.studio` | Site vitrine + API | VM docker (10.10.10.4:8080 / :3000) |
+| `rebours.studio` | Site vitrine + API | K3s NodePort (10.10.10.5:30083) |
 | `arthurbarre.fr` | Portfolio legacy | VM docker (10.10.10.4:8082) |
 | `git.arthurbarre.fr` | Gitea (Git, registry, CI) | K3s NodePort (10.10.10.5:30080) |
 | `douzoute.arthurbarre.fr` | Portfolio Douzoute | K3s NodePort (10.10.10.5:30081) |

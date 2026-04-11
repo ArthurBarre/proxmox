@@ -4,5 +4,4 @@ docker_compose_version: "v2.32.4"
 
 # Services déployés sur cette VM
 docker_services:
-  - rebours    # rebours.studio (nginx + fastify)
   - monitoring # Uptime Kuma

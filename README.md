@@ -138,7 +138,7 @@ VM docker → héberge encore quelques services legacy
 
 ```text
 Internet :443 → Proxmox host DNAT → Traefik gateway (10.10.10.2)
-  ├─ rebours.studio        → VM docker 10.10.10.4:8080 / :3000
+  ├─ rebours.studio        → K3s NodePort 10.10.10.5:30083
   ├─ arthurbarre.fr        → VM docker 10.10.10.4:8082
   ├─ git.arthurbarre.fr    → K3s NodePort 10.10.10.5:30080
   ├─ douzoute.arthurbarre.fr → K3s NodePort 10.10.10.5:30081
@@ -170,7 +170,7 @@ Internet :443 → Proxmox host DNAT → Traefik gateway (10.10.10.2)
 
 | Service | Domaine | Hébergement |
 |---|---|---|
-| rebours.studio | rebours.studio | VM docker (nginx + fastify) |
+| rebours.studio | rebours.studio | K3s NodePort (via Traefik) |
 | arthurbarre.fr | arthurbarre.fr | VM docker (portfolio legacy) |
 | Uptime Kuma | — (Tailscale) | VM docker |
 | MinIO | — (VM docker, usage interne) | VM docker |
@@ -183,7 +183,7 @@ Internet :443 → Proxmox host DNAT → Traefik gateway (10.10.10.2)
 - Le cluster K3s de prod a aujourd'hui un `k3s-master` (`10.10.10.5`, VM 103) et un `k3s-worker` (`10.10.10.6`, VM 104).
 - Les nouveaux services sont déployés via leurs propres repos Gitea avec `.gitea/workflows/deploy.yml`.
 - Le repo `proxmox` reste la source de vérité de l'infra, des routes gateway Traefik et de la doc d'exploitation.
-- La VM docker héberge encore des services legacy (`rebours`, `arthurbarre.fr`, `uptime-kuma`, `minio`).
+- La VM docker héberge encore des services legacy (`arthurbarre.fr`, `uptime-kuma`, `minio`).
 - Voir aussi [production-state.md](/Users/arthurbarre/dev/perso/proxmox/docs/production-state.md:1) pour l'état constaté sur l'infra live le 11 avril 2026.
 
 ## Convention de domaines

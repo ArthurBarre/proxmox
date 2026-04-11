@@ -1,0 +1,16 @@
+# Dynamic config — headlamp.arthurbarre.fr → Headlamp (K3s NodePort)
+http:
+  routers:
+    headlamp:
+      rule: "Host(`headlamp.arthurbarre.fr`)"
+      entryPoints:
+        - websecure
+      service: headlamp
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    headlamp:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.5:30090"

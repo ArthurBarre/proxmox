@@ -21,13 +21,12 @@ doc du repo avec ce qui tourne effectivement sur le Proxmox.
 | `gitea` | Gitea SSH | NodePort `30022` |
 | `portfolio` | Douzoute | NodePort `30081` |
 | `freedge` | Freedge proxy | NodePort `30082` |
+| `rebours` | Rebours (SSR + API + proxy) | NodePort `30083` |
 
 ## Services Docker actifs sur la VM `docker`
 
 | Service | Port | Statut |
 |---|---|---|
-| `rebours-nginx` | `8080` | actif |
-| `rebours-app` | `3000` | actif |
 | `portfolio-web` | `8082` | actif |
 | `uptime-kuma` | `3001` | actif |
 | `minio` | `9000-9001` | actif |
@@ -36,7 +35,7 @@ doc du repo avec ce qui tourne effectivement sur le Proxmox.
 
 ### Codifiées dans ce repo
 
-- `rebours.studio` → `10.10.10.4:8080` / `:3000`
+- `rebours.studio` → K3s `10.10.10.5:30083`
 - `git.arthurbarre.fr` → `10.10.10.5:30080`
 - `douzoute.arthurbarre.fr` → `10.10.10.5:30081`
 - `freedge.app` → `10.10.10.5:30082`
