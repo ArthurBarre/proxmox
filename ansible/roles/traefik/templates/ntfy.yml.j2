@@ -1,0 +1,16 @@
+# Dynamic config — ntfy.arthurbarre.fr → Ntfy (K3s NodePort)
+http:
+  routers:
+    ntfy:
+      rule: "Host(`ntfy.arthurbarre.fr`)"
+      entryPoints:
+        - websecure
+      service: ntfy
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    ntfy:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.5:30092"

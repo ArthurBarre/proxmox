@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ntfy
+  namespace: monitoring
+  labels:
+    app: ntfy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ntfy
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: ntfy
+    spec:
+      containers:
+        - name: ntfy
+          image: binwiederhier/ntfy:v2.11.0
+          args:
+            - serve
+          env:
+            - name: NTFY_BASE_URL
+              value: "https://ntfy.arthurbarre.fr"
+            - name: NTFY_BEHIND_PROXY
+              value: "true"
+            - name: NTFY_AUTH_DEFAULT_ACCESS
+              value: "deny-all"
+            - name: NTFY_UPSTREAM_BASE_URL
+              value: "https://ntfy.sh"
+          ports:
+            - name: http
+              containerPort: 80
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/ntfy
+            - name: cache
+              mountPath: /var/cache/ntfy
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "25m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+          livenessProbe:
+            httpGet:
+              path: /v1/health
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /v1/health
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: ntfy-data
+        - name: cache
+          emptyDir: {}
