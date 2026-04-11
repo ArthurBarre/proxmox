@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(nmap -Pn --top-ports 100 51.38.62.199)"
+    ]
+  }
+}

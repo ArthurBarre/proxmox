@@ -43,6 +43,12 @@
     state: touch
     mode: "0600"
 
+- name: Deploy shared middlewares config
+  template:
+    src: middlewares.yml.j2
+    dest: "{{ traefik_config_dir }}/dynamic/middlewares.yml"
+    mode: "0644"
+
 - name: Deploy rebours.studio dynamic config
   template:
     src: rebours.yml.j2

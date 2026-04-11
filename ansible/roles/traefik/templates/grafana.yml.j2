@@ -1,4 +1,4 @@
-# Dynamic config — grafana.arthurbarre.fr → Grafana (K3s NodePort)
+# Dynamic config — grafana.arthurbarre.fr → Grafana (Tailscale only)
 http:
   routers:
     grafana:
@@ -6,6 +6,9 @@ http:
       entryPoints:
         - websecure
       service: grafana
+      middlewares:
+        - tailscale-only
+        - security-headers
       tls:
         certResolver: letsencrypt
 

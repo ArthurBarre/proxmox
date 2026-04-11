@@ -1,4 +1,4 @@
-# Dynamic config — ntfy.arthurbarre.fr → Ntfy (K3s NodePort)
+# Dynamic config — ntfy.arthurbarre.fr → Ntfy (Tailscale only)
 http:
   routers:
     ntfy:
@@ -6,6 +6,9 @@ http:
       entryPoints:
         - websecure
       service: ntfy
+      middlewares:
+        - tailscale-only
+        - security-headers
       tls:
         certResolver: letsencrypt
 

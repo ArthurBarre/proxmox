@@ -6,6 +6,9 @@ http:
       entryPoints:
         - websecure
       service: portfolio
+      middlewares:
+        - security-headers
+        - rate-limit
       tls:
         certResolver: letsencrypt
 

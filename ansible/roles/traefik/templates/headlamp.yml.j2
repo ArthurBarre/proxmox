@@ -1,4 +1,4 @@
-# Dynamic config — headlamp.arthurbarre.fr → Headlamp (K3s NodePort)
+# Dynamic config — headlamp.arthurbarre.fr → Headlamp (Tailscale only)
 http:
   routers:
     headlamp:
@@ -6,6 +6,9 @@ http:
       entryPoints:
         - websecure
       service: headlamp
+      middlewares:
+        - tailscale-only
+        - security-headers
       tls:
         certResolver: letsencrypt
 

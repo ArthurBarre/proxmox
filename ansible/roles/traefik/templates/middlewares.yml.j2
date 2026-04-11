@@ -1,0 +1,38 @@
+# Managed by Ansible — shared middlewares
+http:
+  middlewares:
+    # Restrict to Tailscale network only
+    tailscale-only:
+      ipAllowList:
+        sourceRange:
+          - "100.64.0.0/10"
+          - "10.10.10.0/24"
+
+    # Security headers for all services
+    security-headers:
+      headers:
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 31536000
+        customFrameOptionsValue: "SAMEORIGIN"
+        referrerPolicy: "strict-origin-when-cross-origin"
+        permissionsPolicy: "camera=(), microphone=(), geolocation=()"
+        customResponseHeaders:
+          X-Robots-Tag: "noindex, nofollow"
+
+    # Rate limiting for public services
+    rate-limit:
+      rateLimit:
+        average: 100
+        burst: 200
+        period: 1m
+
+    # Strict rate limiting for login endpoints
+    rate-limit-auth:
+      rateLimit:
+        average: 10
+        burst: 20
+        period: 1m

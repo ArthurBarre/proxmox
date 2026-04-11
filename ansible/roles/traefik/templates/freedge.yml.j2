@@ -6,6 +6,9 @@ http:
       entryPoints:
         - websecure
       service: freedge
+      middlewares:
+        - security-headers
+        - rate-limit
       tls:
         certResolver: letsencrypt
 
@@ -14,6 +17,9 @@ http:
       entryPoints:
         - websecure
       service: freedge
+      middlewares:
+        - security-headers
+        - rate-limit
       tls:
         certResolver: letsencrypt
 
