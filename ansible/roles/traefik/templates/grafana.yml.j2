@@ -1,0 +1,16 @@
+# Dynamic config — grafana.arthurbarre.fr → Grafana (K3s NodePort)
+http:
+  routers:
+    grafana:
+      rule: "Host(`grafana.arthurbarre.fr`)"
+      entryPoints:
+        - websecure
+      service: grafana
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    grafana:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.5:30091"

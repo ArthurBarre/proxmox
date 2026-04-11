@@ -1,0 +1,6 @@
+---
+- name: Deploy node_exporter on all VMs
+  hosts: gateway,databases,docker_hosts
+  become: true
+  roles:
+    - node_exporter
