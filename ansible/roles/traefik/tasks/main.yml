@@ -55,10 +55,16 @@
     dest: "{{ traefik_config_dir }}/dynamic/gitea.yml"
     mode: "0644"
 
-- name: Deploy aureliebarre.fr dynamic config
+- name: Deploy douzoute.arthurbarre.fr dynamic config
   template:
     src: aurelie.yml.j2
     dest: "{{ traefik_config_dir }}/dynamic/aurelie.yml"
+    mode: "0644"
+
+- name: Deploy freedge.app dynamic config
+  template:
+    src: freedge.yml.j2
+    dest: "{{ traefik_config_dir }}/dynamic/freedge.yml"
     mode: "0644"
 
 - name: Create Traefik systemd service

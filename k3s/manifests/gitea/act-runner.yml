@@ -15,25 +15,34 @@ spec:
       labels:
         app: gitea-act-runner
     spec:
+      # Forcer le scheduling sur le worker (qui a Docker)
+      nodeSelector:
+        kubernetes.io/hostname: k3s-worker
       containers:
         - name: runner
           image: gitea/act_runner:latest
           env:
+            - name: DOCKER_HOST
+              value: "unix:///var/run/docker.sock"
+            - name: CONFIG_FILE
+              value: "/etc/act-runner/config.yml"
             - name: GITEA_INSTANCE_URL
-              value: "http://gitea-http.gitea.svc.cluster.local:3000"
+              value: "http://10.10.10.5:30080"
             - name: GITEA_RUNNER_REGISTRATION_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: gitea-secrets
                   key: runner-token
             - name: GITEA_RUNNER_NAME
-              value: "k3s-runner"
+              value: "k3s-worker"
             - name: GITEA_RUNNER_LABELS
-              value: "ubuntu-latest:docker://node:22,self-hosted:host"
+              value: "ubuntu-latest:docker://catthehacker/ubuntu:act-22.04,self-hosted:host"
           volumeMounts:
-            # Docker-in-Docker: le runner a besoin de Docker pour build les images
             - name: docker-sock
               mountPath: /var/run/docker.sock
+            - name: runner-config
+              mountPath: /etc/act-runner
+              readOnly: true
           resources:
             requests:
               memory: "256Mi"
@@ -41,10 +50,11 @@ spec:
             limits:
               memory: "1Gi"
               cpu: "1000m"
-          securityContext:
-            privileged: true
       volumes:
         - name: docker-sock
           hostPath:
             path: /var/run/docker.sock
             type: Socket
+        - name: runner-config
+          configMap:
+            name: act-runner-config

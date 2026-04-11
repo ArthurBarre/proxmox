@@ -1,8 +1,8 @@
-# Dynamic config — aureliebarre.fr → Portfolio (K3s NodePort)
+# Dynamic config — douzoute.arthurbarre.fr → Portfolio (K3s NodePort)
 http:
   routers:
     aurelie-web:
-      rule: "Host(`aureliebarre.fr`) || Host(`www.aureliebarre.fr`)"
+      rule: "Host(`douzoute.arthurbarre.fr`) || Host(`www.douzoute.arthurbarre.fr`)"
       entryPoints:
         - websecure
       service: aurelie-portfolio

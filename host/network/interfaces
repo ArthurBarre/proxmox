@@ -25,8 +25,16 @@ iface vmbr1 inet static
     post-up   iptables -t nat -A POSTROUTING -s 10.10.10.0/24 -o vmbr0 -j MASQUERADE
     post-down iptables -t nat -D POSTROUTING -s 10.10.10.0/24 -o vmbr0 -j MASQUERADE
 
-    # Forwarding HTTP/HTTPS vers la VM gateway (Traefik)
+    # Forwarding HTTP/HTTPS vers la VM gateway (Traefik) — trafic externe
     post-up   iptables -t nat -A PREROUTING -i vmbr0 -p tcp --dport 80  -j DNAT --to 10.10.10.2:80
     post-up   iptables -t nat -A PREROUTING -i vmbr0 -p tcp --dport 443 -j DNAT --to 10.10.10.2:443
     post-down iptables -t nat -D PREROUTING -i vmbr0 -p tcp --dport 80  -j DNAT --to 10.10.10.2:80
     post-down iptables -t nat -D PREROUTING -i vmbr0 -p tcp --dport 443 -j DNAT --to 10.10.10.2:443
+
+    # Hairpin NAT — trafic interne (VMs) vers l'IP publique redirigé vers Traefik
+    post-up   iptables -t nat -A PREROUTING -s 10.10.10.0/24 -d 51.38.62.199 -p tcp --dport 80  -j DNAT --to 10.10.10.2:80
+    post-up   iptables -t nat -A PREROUTING -s 10.10.10.0/24 -d 51.38.62.199 -p tcp --dport 443 -j DNAT --to 10.10.10.2:443
+    post-up   iptables -t nat -A POSTROUTING -s 10.10.10.0/24 -d 10.10.10.2 -j MASQUERADE
+    post-down iptables -t nat -D PREROUTING -s 10.10.10.0/24 -d 51.38.62.199 -p tcp --dport 80  -j DNAT --to 10.10.10.2:80
+    post-down iptables -t nat -D PREROUTING -s 10.10.10.0/24 -d 51.38.62.199 -p tcp --dport 443 -j DNAT --to 10.10.10.2:443
+    post-down iptables -t nat -D POSTROUTING -s 10.10.10.0/24 -d 10.10.10.2 -j MASQUERADE

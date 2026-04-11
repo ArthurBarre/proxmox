@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: act-runner-config
+  namespace: gitea
+data:
+  config.yml: |
+    runner:
+      capacity: 2
+      timeout: 3h
+
+    container:
+      network: bridge
+      # Hairpin NAT workaround: git.arthurbarre.fr → Traefik interne (10.10.10.2)
+      options: "--add-host=git.arthurbarre.fr:10.10.10.2"
+      valid_volumes:
+        - "**"

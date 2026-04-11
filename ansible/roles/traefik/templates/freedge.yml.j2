@@ -1,0 +1,24 @@
+# Dynamic config — freedge.app → Freedge (K3s NodePort)
+http:
+  routers:
+    freedge:
+      rule: "Host(`freedge.app`)"
+      entryPoints:
+        - websecure
+      service: freedge
+      tls:
+        certResolver: letsencrypt
+
+    freedge-www:
+      rule: "Host(`www.freedge.app`)"
+      entryPoints:
+        - websecure
+      service: freedge
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    freedge:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.5:30082"
