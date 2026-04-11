@@ -150,6 +150,11 @@ Internet :443 → iptables DNAT → Traefik (10.10.10.2) → Nginx (10.10.10.4:8
 | rebours.studio | rebours.studio | VM docker (nginx + fastify) |
 | Uptime Kuma | — (Tailscale) | VM docker |
 
+## Convention de domaines
+
+- **Outils perso / infra** → `*.arthurbarre.fr` (ex: `git.arthurbarre.fr`)
+- **Projets pro / clients** → nom de domaine dédié (ex: `rebours.studio`, `aureliebarre.fr`)
+
 ## Disaster recovery
 
 Pour remonter l'infra from scratch :

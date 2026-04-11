@@ -30,3 +30,26 @@
 | 8080 | gateway | Dashboard Traefik |
 | 5432 | db | PostgreSQL |
 | 3001 | docker | Uptime Kuma |
+| 30080 | k3s (NodePort) | Gitea |
+
+## Convention de noms de domaine
+
+| Type | Domaine | Exemple | Usage |
+|---|---|---|---|
+| Outils perso / infra | `*.arthurbarre.fr` | `git.arthurbarre.fr`, `ci.arthurbarre.fr` | Gitea, monitoring, dashboards, outils internes |
+| Projets clients / pro | domaine dédié du projet | `rebours.studio`, `aureliebarre.fr` | Sites et apps en production pour des tiers |
+
+### Règle pour le skill de déploiement automatique
+
+Lors du déploiement d'un nouveau service, le skill doit demander (via `AskUserQuestion`) :
+
+- **Projet perso / infra** → sous-domaine de `arthurbarre.fr` (ex: `xxx.arthurbarre.fr`)
+- **Projet pro / client** → nom de domaine dédié fourni par le client (ex: `monsite.com`)
+
+### Domaines actifs
+
+| Domaine | Service | Cible |
+|---|---|---|
+| `rebours.studio` | Site vitrine + API | VM docker (10.10.10.4:8080 / :3000) |
+| `git.arthurbarre.fr` | Gitea (Git, registry, CI) | K3s NodePort (10.10.10.5:30080) |
+| `aureliebarre.fr` | Portfolio Aurélie | K3s NodePort (10.10.10.5:30081) |

@@ -1,0 +1,16 @@
+# Dynamic config — aureliebarre.fr → Portfolio (K3s NodePort)
+http:
+  routers:
+    aurelie-web:
+      rule: "Host(`aureliebarre.fr`) || Host(`www.aureliebarre.fr`)"
+      entryPoints:
+        - websecure
+      service: aurelie-portfolio
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    aurelie-portfolio:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.5:30081"

@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitea-act-runner
+  namespace: gitea
+  labels:
+    app: gitea-act-runner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitea-act-runner
+  template:
+    metadata:
+      labels:
+        app: gitea-act-runner
+    spec:
+      containers:
+        - name: runner
+          image: gitea/act_runner:latest
+          env:
+            - name: GITEA_INSTANCE_URL
+              value: "http://gitea-http.gitea.svc.cluster.local:3000"
+            - name: GITEA_RUNNER_REGISTRATION_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: gitea-secrets
+                  key: runner-token
+            - name: GITEA_RUNNER_NAME
+              value: "k3s-runner"
+            - name: GITEA_RUNNER_LABELS
+              value: "ubuntu-latest:docker://node:22,self-hosted:host"
+          volumeMounts:
+            # Docker-in-Docker: le runner a besoin de Docker pour build les images
+            - name: docker-sock
+              mountPath: /var/run/docker.sock
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          securityContext:
+            privileged: true
+      volumes:
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+            type: Socket

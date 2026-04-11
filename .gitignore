@@ -10,6 +10,9 @@ terraform/.terraform.lock.hcl
 ansible/*.retry
 ansible/inventory/hosts.yml
 
+# K3s
+k3s/kubeconfig.yaml
+
 # Secrets
 *.pem
 *.key

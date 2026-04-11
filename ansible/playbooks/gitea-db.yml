@@ -1,0 +1,52 @@
+---
+# Playbook: Créer la base de données Gitea sur le serveur PostgreSQL
+# Usage: ansible-playbook playbooks/gitea-db.yml
+- name: Provision Gitea database on PostgreSQL
+  hosts: databases
+  become: true
+  vars_prompt:
+    - name: gitea_db_password
+      prompt: "Mot de passe pour l'utilisateur gitea PostgreSQL"
+      private: true
+
+  tasks:
+    - name: Install python3-psycopg2 (pour le module Ansible postgresql)
+      apt:
+        name: python3-psycopg2
+        state: present
+
+    - name: Create gitea PostgreSQL user
+      become_user: postgres
+      community.postgresql.postgresql_user:
+        name: gitea
+        password: "{{ gitea_db_password }}"
+        state: present
+        login_unix_socket: /run/postgresql
+
+    - name: Create gitea database
+      become_user: postgres
+      community.postgresql.postgresql_db:
+        name: gitea
+        owner: gitea
+        encoding: UTF-8
+        state: present
+        login_unix_socket: /run/postgresql
+
+    - name: Grant all privileges on gitea database
+      become_user: postgres
+      community.postgresql.postgresql_privs:
+        database: gitea
+        type: database
+        roles: gitea
+        privs: ALL
+        state: present
+        login_unix_socket: /run/postgresql
+
+    - name: Display success message
+      debug:
+        msg: |
+          Base de données Gitea créée avec succès !
+          Host: 10.10.10.3
+          DB: gitea
+          User: gitea
+          Utilise ce mot de passe dans le secret K8s gitea-secrets.

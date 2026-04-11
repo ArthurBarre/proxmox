@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitea
+  namespace: gitea
+  labels:
+    app: gitea
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitea
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: gitea
+    spec:
+      initContainers:
+        - name: init-config
+          image: busybox:latest
+          command: ['sh', '-c', 'cp /etc/gitea-template/app.ini /etc/gitea/app.ini && chmod 666 /etc/gitea/app.ini']
+          volumeMounts:
+            - name: config-template
+              mountPath: /etc/gitea-template
+              readOnly: true
+            - name: config-writable
+              mountPath: /etc/gitea
+      containers:
+        - name: gitea
+          image: gitea/gitea:1.23-rootless
+          ports:
+            - name: http
+              containerPort: 3000
+            - name: ssh
+              containerPort: 2222
+          env:
+            - name: GITEA__database__PASSWD
+              valueFrom:
+                secretKeyRef:
+                  name: gitea-secrets
+                  key: db-password
+            - name: GITEA__security__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: gitea-secrets
+                  key: secret-key
+            - name: GITEA__security__INTERNAL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: gitea-secrets
+                  key: internal-token
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/gitea
+            - name: config-writable
+              mountPath: /etc/gitea
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /api/v1/version
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/v1/version
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: gitea-data
+        - name: config-template
+          configMap:
+            name: gitea-config
+        - name: config-writable
+          emptyDir: {}

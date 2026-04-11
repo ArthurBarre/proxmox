@@ -28,6 +28,7 @@
     src: "{{ traefik_install_dir }}/traefik"
     dest: /usr/local/bin/traefik
     state: link
+    force: true
 
 - name: Create Traefik static config
   template:
@@ -46,6 +47,18 @@
   template:
     src: rebours.yml.j2
     dest: "{{ traefik_config_dir }}/dynamic/rebours.yml"
+    mode: "0644"
+
+- name: Deploy Gitea dynamic config
+  template:
+    src: gitea.yml.j2
+    dest: "{{ traefik_config_dir }}/dynamic/gitea.yml"
+    mode: "0644"
+
+- name: Deploy aureliebarre.fr dynamic config
+  template:
+    src: aurelie.yml.j2
+    dest: "{{ traefik_config_dir }}/dynamic/aurelie.yml"
     mode: "0644"
 
 - name: Create Traefik systemd service

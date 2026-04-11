@@ -1,0 +1,16 @@
+# Dynamic config — git.arthurbarre.fr → Gitea (K3s NodePort)
+http:
+  routers:
+    gitea-web:
+      rule: "Host(`git.arthurbarre.fr`)"
+      entryPoints:
+        - websecure
+      service: gitea
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    gitea:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.5:30080"
