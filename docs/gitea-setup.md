@@ -14,6 +14,13 @@ CI/CD: Gitea Actions → Act Runner (pod K3s, worker) → Docker socket → Buil
                                                      → kubectl → K3s deploy
 ```
 
+Le modèle de prod actuel est :
+
+- le repo applicatif porte son `Dockerfile`, ses manifests `k8s/` et son workflow `.gitea/workflows/deploy.yml`
+- Gitea Actions build les images et les pousse sur le registry Gitea
+- le workflow crée / met à jour les secrets K8s nécessaires puis déploie sur K3s
+- le repo `proxmox` porte la route Traefik gateway vers le `NodePort` exposé par l'app
+
 ---
 
 ## Composants déployés
@@ -47,6 +54,49 @@ CI/CD: Gitea Actions → Act Runner (pod K3s, worker) → Docker socket → Buil
 | `k3s/manifests/gitea/act-runner.yml` | Runner CI schedulé sur k3s-worker |
 | `ansible/playbooks/gitea-db.yml` | Création DB PostgreSQL pour Gitea |
 | `ansible/roles/traefik/templates/gitea.yml.j2` | Route Traefik → git.arthurbarre.fr |
+
+---
+
+## Pattern de déploiement applicatif
+
+Ce pattern est utilisé en production pour `freedge.app`.
+
+### Ce qui vit dans le repo applicatif
+
+- `backend/Dockerfile` et / ou `frontend/Dockerfile`
+- `k8s/namespace.yml`
+- `k8s/configmap.yml`
+- `k8s/service.yml`
+- `k8s/deployment.yml`
+- `k8s/pvc.yml` si stockage persistant
+- `.gitea/workflows/deploy.yml`
+
+### Ce qui vit dans le repo proxmox
+
+- la doc d'exploitation
+- la route Traefik gateway (`ansible/roles/traefik/templates/*.yml.j2`)
+- la doc réseau / IP / états de prod
+- les rôles Ansible du socle
+
+### Secrets Gitea Actions attendus par le workflow
+
+Pour un repo applicatif K3s standard :
+
+- `REGISTRY_PASSWORD`
+- `KUBECONFIG`
+- `DATABASE_URL`
+- les secrets applicatifs nécessaires (`JWT_SECRET`, `OPENAI_API_KEY`, etc.)
+
+### Exemple : freedge.app
+
+- repo : `ordinarthur/freedge`
+- registry :
+  - `git.arthurbarre.fr/ordinarthur/freedge-backend`
+  - `git.arthurbarre.fr/ordinarthur/freedge-frontend`
+- namespace K3s : `freedge`
+- NodePort gateway : `30082`
+- base PostgreSQL : `freedge` sur `10.10.10.3`
+- route Traefik : `ansible/roles/traefik/templates/freedge.yml.j2`
 
 ---
 

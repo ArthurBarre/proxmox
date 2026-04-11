@@ -1,0 +1,30 @@
+# Dynamic config — arthurbarre.fr → portfolio legacy (Docker VM)
+http:
+  routers:
+    portfolio:
+      rule: "Host(`arthurbarre.fr`)"
+      entryPoints:
+        - websecure
+      service: portfolio
+      tls:
+        certResolver: letsencrypt
+
+    portfolio-http:
+      rule: "Host(`arthurbarre.fr`)"
+      entryPoints:
+        - web
+      middlewares:
+        - portfolio-redirect-https
+      service: portfolio
+
+  middlewares:
+    portfolio-redirect-https:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+  services:
+    portfolio:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.4:8082"

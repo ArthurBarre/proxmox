@@ -34,9 +34,11 @@ all:
           private_ip: 10.10.10.5
           k3s_role: server
 
+    # En prod, un worker existe déjà sur 10.10.10.6 (VM 104).
+    # Renseigner son IP Tailscale si tu veux aussi le gérer par Ansible.
     # k3s_workers:
     #   hosts:
-    #     k3s-worker-1:
+    #     k3s-worker:
     #       ansible_host: 100.x.x.x
     #       private_ip: 10.10.10.6
     #       k3s_role: agent

@@ -9,7 +9,8 @@
 | 10.10.10.3 | db | PostgreSQL 15 | 101 | 100.114.242.60 |
 | 10.10.10.4 | docker | Docker host (rebours.studio, monitoring) | 102 | 100.79.77.93 |
 | 10.10.10.5 | k3s-master | K3s control plane | 103 | 100.78.207.119 |
-| 10.10.10.6-9 | k3s-worker-N | K3s workers (réservé) | 104-107 | — |
+| 10.10.10.6 | k3s-worker | K3s worker + Docker pour Act Runner | 104 | — |
+| 10.10.10.7-9 | k3s-worker-N | K3s workers additionnels (réservé) | 105-107 | — |
 | 10.10.10.10+ | — | VMs à la volée (Terraform) | 110+ | — |
 
 ## Ports exposés sur IP publique (51.38.62.199)
@@ -31,6 +32,10 @@
 | 5432 | db | PostgreSQL |
 | 3001 | docker | Uptime Kuma |
 | 30080 | k3s (NodePort) | Gitea |
+| 30081 | k3s (NodePort) | Douzoute |
+| 30082 | k3s (NodePort) | Freedge |
+| 8082 | docker | arthurbarre.fr (portfolio legacy) |
+| 9000-9001 | docker | MinIO (usage interne / admin) |
 
 ## Convention de noms de domaine
 
@@ -51,5 +56,7 @@ Lors du déploiement d'un nouveau service, le skill doit demander (via `AskUserQ
 | Domaine | Service | Cible |
 |---|---|---|
 | `rebours.studio` | Site vitrine + API | VM docker (10.10.10.4:8080 / :3000) |
+| `arthurbarre.fr` | Portfolio legacy | VM docker (10.10.10.4:8082) |
 | `git.arthurbarre.fr` | Gitea (Git, registry, CI) | K3s NodePort (10.10.10.5:30080) |
 | `douzoute.arthurbarre.fr` | Portfolio Douzoute | K3s NodePort (10.10.10.5:30081) |
+| `freedge.app` | Freedge | K3s NodePort (10.10.10.5:30082) |

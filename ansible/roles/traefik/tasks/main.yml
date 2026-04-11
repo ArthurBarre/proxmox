@@ -61,6 +61,12 @@
     dest: "{{ traefik_config_dir }}/dynamic/aurelie.yml"
     mode: "0644"
 
+- name: Deploy arthurbarre.fr dynamic config
+  template:
+    src: portfolio.yml.j2
+    dest: "{{ traefik_config_dir }}/dynamic/portfolio.yml"
+    mode: "0644"
+
 - name: Deploy freedge.app dynamic config
   template:
     src: freedge.yml.j2

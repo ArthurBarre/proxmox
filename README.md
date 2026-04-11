@@ -16,10 +16,16 @@ Internet (:443/:80)
 │                                                   │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
 │  │ gateway  │ │ db       │ │ docker   │ │ k3s      │
-│  │ Traefik  │ │ PG 15    │ │ Docker   │ │ K3s      │
+│  │ Traefik  │ │ PG 15    │ │ Docker   │ │ master   │
 │  │ .10.2    │ │ .10.3    │ │ .10.4    │ │ .10.5    │
 │  │ VM 100   │ │ VM 101   │ │ VM 102   │ │ VM 103   │
 │  └──────────┘ └──────────┘ └──────────┘ └──────────┘
+│                                  ┌──────────┐
+│                                  │ k3s      │
+│                                  │ worker   │
+│                                  │ .10.6    │
+│                                  │ VM 104   │
+│                                  └──────────┘
 └──────────────────────────────────────────────────┘
     │
     Tailscale mesh → laptop / phone
@@ -56,6 +62,8 @@ Internet (:443/:80)
 │
 ├── docs/               # Documentation complémentaire
 │   ├── ip-plan.md      # Plan d'adressage complet
+│   ├── gitea-setup.md  # Forge, registry, Actions, workflow de déploiement
+│   ├── production-state.md # État réel de la prod et dérives connues
 │   └── tailscale-acl.json
 │
 ├── PLAN-PROXMOX.md     # Plan initial détaillé (référence)
@@ -116,11 +124,25 @@ kubectl get nodes
 ./scripts/deploy-vm.sh --name dev-api --ip 10.10.10.20 --ram 2048
 ```
 
-## Flux du trafic web
+## Modèle de production
 
 ```
-Internet :443 → iptables DNAT → Traefik (10.10.10.2) → Nginx (10.10.10.4:8080)
-                                                      → Fastify (10.10.10.4:3000)
+Proxmox repo  → infra, Ansible, routes Traefik, docs d'exploitation
+Repo applicatif Gitea → code, Dockerfile, manifests K8s, workflow .gitea
+Gitea Actions → build image, push registry, kubectl apply / rollout
+K3s → runtime par défaut des nouveaux services
+VM docker → héberge encore quelques services legacy
+```
+
+## Flux du trafic web
+
+```text
+Internet :443 → Proxmox host DNAT → Traefik gateway (10.10.10.2)
+  ├─ rebours.studio        → VM docker 10.10.10.4:8080 / :3000
+  ├─ arthurbarre.fr        → VM docker 10.10.10.4:8082
+  ├─ git.arthurbarre.fr    → K3s NodePort 10.10.10.5:30080
+  ├─ douzoute.arthurbarre.fr → K3s NodePort 10.10.10.5:30081
+  └─ freedge.app           → K3s NodePort 10.10.10.5:30082
 ```
 
 ## Accès admin (Tailscale uniquement)
@@ -132,6 +154,7 @@ Internet :443 → iptables DNAT → Traefik (10.10.10.2) → Nginx (10.10.10.4:8
 | Uptime Kuma | http://100.79.77.93:3001 |
 | PostgreSQL | 100.114.242.60:5432 |
 | K3s API | https://100.78.207.119:6443 |
+| Gitea | https://git.arthurbarre.fr |
 
 ## Sécurité
 
@@ -148,8 +171,20 @@ Internet :443 → iptables DNAT → Traefik (10.10.10.2) → Nginx (10.10.10.4:8
 | Service | Domaine | Hébergement |
 |---|---|---|
 | rebours.studio | rebours.studio | VM docker (nginx + fastify) |
+| arthurbarre.fr | arthurbarre.fr | VM docker (portfolio legacy) |
 | Uptime Kuma | — (Tailscale) | VM docker |
+| MinIO | — (VM docker, usage interne) | VM docker |
+| Gitea | git.arthurbarre.fr | K3s NodePort (via Traefik) |
 | Portfolio Douzoute | douzoute.arthurbarre.fr | K3s NodePort (via Traefik) |
+| Freedge | freedge.app | K3s NodePort (via Traefik) |
+
+## État réel
+
+- Le cluster K3s de prod a aujourd'hui un `k3s-master` (`10.10.10.5`, VM 103) et un `k3s-worker` (`10.10.10.6`, VM 104).
+- Les nouveaux services sont déployés via leurs propres repos Gitea avec `.gitea/workflows/deploy.yml`.
+- Le repo `proxmox` reste la source de vérité de l'infra, des routes gateway Traefik et de la doc d'exploitation.
+- La VM docker héberge encore des services legacy (`rebours`, `arthurbarre.fr`, `uptime-kuma`, `minio`).
+- Voir aussi [production-state.md](/Users/arthurbarre/dev/perso/proxmox/docs/production-state.md:1) pour l'état constaté sur l'infra live le 11 avril 2026.
 
 ## Convention de domaines
 
@@ -166,4 +201,5 @@ Pour remonter l'infra from scratch :
 4. `terraform apply` pour recréer les VMs
 5. `ansible-playbook playbooks/site.yml` pour tout configurer
 6. Restaurer les données PostgreSQL depuis les backups
-7. Redéployer les services Docker (docker-compose up -d)
+7. Redéployer les services Docker legacy encore présents sur la VM `docker`
+8. Redéployer les apps K3s via leurs repos Gitea / Gitea Actions
