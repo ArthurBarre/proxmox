@@ -17,6 +17,7 @@ k3s/kubeconfig.yaml
 *.pem
 *.key
 .env
+.secrets
 secrets/
 **/tailscale-authkey
 **/stripe-*

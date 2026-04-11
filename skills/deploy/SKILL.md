@@ -229,6 +229,20 @@ Remind the user to:
 
 ## Step 7 — Create Gitea repo and push
 
+### 7a. Load secrets
+
+The Gitea registry password is stored locally. Load it before any API call or secret configuration:
+
+```bash
+# Load from the proxmox repo secrets file
+source <proxmox-repo>/.secrets
+# This provides: REGISTRY_PASSWORD
+```
+
+The `.secrets` file is in `.gitignore` and never committed.
+
+### 7b. Create repo and push
+
 ```bash
 # Create repo via API
 curl -X POST "https://git.arthurbarre.fr/api/v1/user/repos" \
@@ -245,9 +259,21 @@ git commit -m "Initial commit"
 git push -u origin main
 ```
 
-**Before pushing**, remind the user to configure Gitea secrets:
+### 7c. Configure Gitea secrets
+
+**Before pushing**, configure Gitea secrets. Use the `REGISTRY_PASSWORD` loaded from `.secrets` to automatically set it via Gitea API:
+
+```bash
+# Auto-configure REGISTRY_PASSWORD from .secrets
+curl -X PUT "https://git.arthurbarre.fr/api/v1/repos/ordinarthur/<app-name>/actions/secrets/REGISTRY_PASSWORD" \
+  -H "Authorization: token <GITEA_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d "{\"data\": \"$REGISTRY_PASSWORD\"}"
+```
+
+Remind the user to also configure:
 - Go to `https://git.arthurbarre.fr/ordinarthur/<app-name>/settings/actions/secrets`
-- Add `REGISTRY_PASSWORD` and `KUBECONFIG` (always needed)
+- Add `KUBECONFIG` (always needed)
 - Add app-specific secrets (list them explicitly)
 
 ## Step 8 — Update infra documentation

@@ -1,29 +1,24 @@
-# Dynamic config — rebours.studio
+# Dynamic config — rebours.studio → K3s NodePort
 http:
   routers:
-    rebours-web:
+    rebours:
       rule: "Host(`rebours.studio`)"
       entryPoints:
         - websecure
-      service: rebours-nginx
+      service: rebours
       tls:
         certResolver: letsencrypt
 
-    rebours-api:
-      rule: "Host(`rebours.studio`) && PathPrefix(`/api`)"
+    rebours-www:
+      rule: "Host(`www.rebours.studio`)"
       entryPoints:
         - websecure
-      service: rebours-api
+      service: rebours
       tls:
         certResolver: letsencrypt
 
   services:
-    rebours-nginx:
+    rebours:
       loadBalancer:
         servers:
-          - url: "http://10.10.10.4:8080"
-
-    rebours-api:
-      loadBalancer:
-        servers:
-          - url: "http://10.10.10.4:3000"
+          - url: "http://10.10.10.5:30083"
