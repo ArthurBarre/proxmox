@@ -36,6 +36,7 @@
 | 30082 | k3s (NodePort) | Freedge |
 | 30083 | k3s (NodePort) | Rebours |
 | 8082 | docker | arthurbarre.fr (portfolio legacy) |
+| 30094 | k3s (NodePort) | We Talk |
 | 9000-9001 | docker | MinIO (usage interne / admin) |
 
 ## Convention de noms de domaine
@@ -61,3 +62,4 @@ Lors du déploiement d'un nouveau service, le skill doit demander (via `AskUserQ
 | `git.arthurbarre.fr` | Gitea (Git, registry, CI) | K3s NodePort (10.10.10.5:30080) |
 | `douzoute.arthurbarre.fr` | Portfolio Douzoute | K3s NodePort (10.10.10.5:30081) |
 | `freedge.app` | Freedge | K3s NodePort (10.10.10.5:30082) |
+| `we-talk.arthurbarre.fr` | We Talk (podcast communautaire) | K3s NodePort (10.10.10.5:30094) |

@@ -1,0 +1,19 @@
+# Dynamic config — we-talk.arthurbarre.fr → We Talk (K3s NodePort)
+http:
+  routers:
+    wetalk:
+      rule: "Host(`we-talk.arthurbarre.fr`)"
+      entryPoints:
+        - websecure
+      service: wetalk
+      middlewares:
+        - security-headers
+        - rate-limit
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    wetalk:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.5:30094"
