@@ -15,9 +15,13 @@ spec:
       labels:
         app: supabase-rest
     spec:
+      initContainers:
+        - name: wait-for-db
+          image: supabase/postgres:15.8.1.085
+          command: ["sh", "-c", "until pg_isready -h supabase-db.supabase.svc.cluster.local -p 5432; do sleep 2; done"]
       containers:
         - name: postgrest
-          image: postgrest/postgrest:v12.2.12
+          image: postgrest/postgrest:v14.0
           ports:
             - containerPort: 3000
           env:

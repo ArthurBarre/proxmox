@@ -13,22 +13,17 @@ data:
       sleep 2
     done
 
-    echo "Running Supabase DB init..."
-
-    # supabase/postgres image already has roles pre-created
-    # We just need to set passwords to match our secrets
+    echo "Setting role passwords via supabase_admin..."
     PGPASSWORD="$POSTGRES_PASSWORD" psql -h supabase-db.supabase.svc.cluster.local -U supabase_admin -d postgres -c "ALTER ROLE authenticator WITH PASSWORD '$POSTGRES_PASSWORD';"
     PGPASSWORD="$POSTGRES_PASSWORD" psql -h supabase-db.supabase.svc.cluster.local -U supabase_admin -d postgres -c "ALTER ROLE supabase_auth_admin WITH PASSWORD '$POSTGRES_PASSWORD';"
     PGPASSWORD="$POSTGRES_PASSWORD" psql -h supabase-db.supabase.svc.cluster.local -U supabase_admin -d postgres -c "ALTER ROLE supabase_storage_admin WITH PASSWORD '$POSTGRES_PASSWORD';"
 
-    # Ensure grants are in place
     PGPASSWORD="$POSTGRES_PASSWORD" psql -h supabase-db.supabase.svc.cluster.local -U supabase_admin -d postgres -c "
     GRANT anon TO authenticator;
     GRANT authenticated TO authenticator;
     GRANT service_role TO authenticator;
     GRANT anon TO supabase_storage_admin;
     GRANT authenticated TO supabase_storage_admin;
-
     CREATE SCHEMA IF NOT EXISTS _realtime;
     CREATE SCHEMA IF NOT EXISTS graphql_public;
     "
@@ -47,15 +42,10 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: init-db
-          image: supabase/postgres:15.8.1.060
+          image: supabase/postgres:15.8.1.085
           command: ["bash", "/scripts/init.sh"]
           env:
             - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: supabase-secrets
-                  key: postgres-password
-            - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
                   name: supabase-secrets

@@ -15,6 +15,10 @@ spec:
       labels:
         app: supabase-meta
     spec:
+      initContainers:
+        - name: wait-for-db
+          image: supabase/postgres:15.8.1.085
+          command: ["sh", "-c", "until pg_isready -h supabase-db.supabase.svc.cluster.local -p 5432; do sleep 2; done"]
       containers:
         - name: postgres-meta
           image: supabase/postgres-meta:v0.84.2

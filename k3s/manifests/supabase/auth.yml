@@ -15,9 +15,13 @@ spec:
       labels:
         app: supabase-auth
     spec:
+      initContainers:
+        - name: wait-for-db
+          image: supabase/postgres:15.8.1.085
+          command: ["sh", "-c", "until pg_isready -h supabase-db.supabase.svc.cluster.local -p 5432; do sleep 2; done"]
       containers:
         - name: gotrue
-          image: supabase/gotrue:v2.170.0
+          image: supabase/gotrue:v2.186.0
           ports:
             - containerPort: 9999
           env:
@@ -35,9 +39,9 @@ spec:
                   name: supabase-secrets
                   key: auth-db-uri
             - name: GOTRUE_SITE_URL
-              value: "https://supabase.arthurbarre.fr"
+              value: "https://we-talk.arthurbarre.fr"
             - name: GOTRUE_URI_ALLOW_LIST
-              value: ""
+              value: "https://we-talk.arthurbarre.fr,https://we-talk.arthurbarre.fr/**"
             - name: GOTRUE_DISABLE_SIGNUP
               value: "false"
             - name: GOTRUE_JWT_ADMIN_ROLES
@@ -55,6 +59,10 @@ spec:
                   key: jwt-secret
             - name: GOTRUE_EXTERNAL_EMAIL_ENABLED
               value: "true"
+            - name: GOTRUE_EXTERNAL_PHONE_ENABLED
+              value: "false"
+            - name: GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED
+              value: "false"
             - name: GOTRUE_MAILER_AUTOCONFIRM
               value: "true"
             - name: GOTRUE_SMTP_ADMIN_EMAIL

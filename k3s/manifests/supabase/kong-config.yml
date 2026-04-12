@@ -24,7 +24,7 @@ data:
         group: admin
 
     services:
-      # Auth
+      # Auth - open routes (no API key needed)
       - name: auth-v1-open
         url: http://supabase-auth.supabase.svc.cluster.local:9999/verify
         routes:
@@ -52,8 +52,18 @@ data:
               - /auth/v1/authorize
         plugins:
           - name: cors
+      - name: auth-v1-open-jwks
+        url: http://supabase-auth.supabase.svc.cluster.local:9999/.well-known/jwks.json
+        routes:
+          - name: auth-v1-open-jwks
+            strip_path: true
+            paths:
+              - /auth/v1/.well-known/jwks.json
+        plugins:
+          - name: cors
+
+      # Auth - protected routes
       - name: auth-v1
-        _comment: "GoTrue: /auth/v1/* -> :9999/*"
         url: http://supabase-auth.supabase.svc.cluster.local:9999/
         routes:
           - name: auth-v1-all
@@ -74,7 +84,6 @@ data:
 
       # PostgREST
       - name: rest-v1
-        _comment: "PostgREST: /rest/v1/* -> :3000/*"
         url: http://supabase-rest.supabase.svc.cluster.local:3000/
         routes:
           - name: rest-v1-all
@@ -93,9 +102,28 @@ data:
                 - admin
                 - anon
 
+      # GraphQL (also via PostgREST)
+      - name: graphql-v1
+        url: http://supabase-rest.supabase.svc.cluster.local:3000/rpc/graphql
+        routes:
+          - name: graphql-v1
+            strip_path: true
+            paths:
+              - /graphql/v1
+        plugins:
+          - name: cors
+          - name: key-auth
+            config:
+              hide_credentials: false
+          - name: acl
+            config:
+              hide_groups_header: true
+              allow:
+                - admin
+                - anon
+
       # Realtime
       - name: realtime-v1
-        _comment: "Realtime: /realtime/v1/* -> :4000/socket/*"
         url: http://supabase-realtime.supabase.svc.cluster.local:4000/socket/
         routes:
           - name: realtime-v1-all
@@ -116,7 +144,6 @@ data:
 
       # Storage
       - name: storage-v1
-        _comment: "Storage: /storage/v1/* -> :5000/*"
         url: http://supabase-storage.supabase.svc.cluster.local:5000/
         routes:
           - name: storage-v1-all
@@ -137,7 +164,6 @@ data:
 
       # Meta (postgres-meta)
       - name: meta
-        _comment: "pg-meta: /pg/* -> :8080/*"
         url: http://supabase-meta.supabase.svc.cluster.local:8080/
         routes:
           - name: meta-all

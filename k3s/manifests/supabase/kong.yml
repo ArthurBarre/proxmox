@@ -42,7 +42,7 @@ spec:
               mountPath: /config
       containers:
         - name: kong
-          image: kong:2.8.1
+          image: kong/kong:3.9.1
           ports:
             - containerPort: 8000
             - containerPort: 8443
@@ -59,6 +59,8 @@ spec:
               value: 160k
             - name: KONG_NGINX_PROXY_PROXY_BUFFERS
               value: 64 160k
+            - name: KONG_STATUS_LISTEN
+              value: 0.0.0.0:8100
           volumeMounts:
             - name: kong-config
               mountPath: /config
@@ -70,10 +72,17 @@ spec:
               memory: "512Mi"
               cpu: "500m"
           livenessProbe:
-            exec:
-              command: ["kong", "health"]
+            httpGet:
+              path: /status
+              port: 8100
             initialDelaySeconds: 15
             periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: 8100
+            initialDelaySeconds: 5
+            periodSeconds: 10
       volumes:
         - name: kong-config-template
           configMap:
