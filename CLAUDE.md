@@ -108,6 +108,25 @@ Dashboard Traefik : `100.106.59.13:8080` (Tailscale uniquement)
 - **Réseau** : 10.10.10.0/24 privé, Tailscale 100.64.0.0/10 pour admin
 - **Registre** : `git.arthurbarre.fr/<org>/<app>:<tag>` (Gitea Container Registry)
 
+## Supabase (self-hosted)
+
+Namespace `supabase` — basé sur [supabase-community/supabase-kubernetes](https://github.com/supabase-community/supabase-kubernetes)
+
+**Services** : PostgreSQL, Auth (GoTrue), PostgREST, Realtime, Storage, Imgproxy, Meta (pg-meta), Kong (API gateway), Studio
+
+**Manifests** : `k3s/manifests/supabase/`
+
+**Secrets** : `supabase-secrets` (généré via `k3s/manifests/supabase/generate-secrets.sh`)
+- `jwt-secret`, `anon-key`, `service-role-key`, `postgres-password`, `postgrest-db-uri`, `auth-db-uri`, `storage-db-uri`, `secret-key-base`, `google-oauth-secret`
+
+**DB superuser** : `supabase_admin` (pas `postgres`)
+
+**Google OAuth** : configuré via GoTrue (`GOTRUE_EXTERNAL_GOOGLE_*`), Client ID Google Cloud Console projet We Talk, redirect URI `https://supabase.arthurbarre.fr/auth/v1/callback`
+
+**Accès** :
+- API publique : `https://supabase.arthurbarre.fr` (Kong, NodePort 30094)
+- Studio : `https://studio.supabase.arthurbarre.fr` (Tailscale only, NodePort 30095)
+
 ## Terraform
 
 ```bash
