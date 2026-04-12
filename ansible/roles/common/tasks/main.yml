@@ -49,6 +49,31 @@
       APT::Periodic::AutocleanInterval "7";
     mode: "0644"
 
+- name: Deploy disk cleanup script
+  template:
+    src: disk-cleanup.sh.j2
+    dest: /usr/local/bin/disk-cleanup.sh
+    mode: "0755"
+
+- name: Deploy disk cleanup timer
+  template:
+    src: disk-cleanup.timer.j2
+    dest: /etc/systemd/system/disk-cleanup.timer
+    mode: "0644"
+
+- name: Deploy disk cleanup service
+  template:
+    src: disk-cleanup.service.j2
+    dest: /etc/systemd/system/disk-cleanup.service
+    mode: "0644"
+
+- name: Enable disk cleanup timer
+  systemd:
+    name: disk-cleanup.timer
+    enabled: true
+    state: started
+    daemon_reload: true
+
 - name: Install Tailscale
   shell: curl -fsSL https://tailscale.com/install.sh | sh
   args:

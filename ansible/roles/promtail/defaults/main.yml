@@ -1,0 +1,3 @@
+---
+promtail_version: "3.5.0"
+promtail_loki_url: "http://10.10.10.5:30093"

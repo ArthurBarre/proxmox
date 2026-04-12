@@ -1,0 +1,63 @@
+---
+- name: Create promtail user
+  user:
+    name: promtail
+    shell: /usr/sbin/nologin
+    system: true
+    create_home: false
+    groups: adm
+    append: true
+
+- name: Download promtail
+  get_url:
+    url: "https://github.com/grafana/loki/releases/download/v{{ promtail_version }}/promtail-linux-amd64.zip"
+    dest: /tmp/promtail.zip
+    mode: "0644"
+
+- name: Install unzip
+  apt:
+    name: unzip
+    state: present
+
+- name: Extract promtail
+  unarchive:
+    src: /tmp/promtail.zip
+    dest: /tmp
+    remote_src: yes
+
+- name: Install promtail binary
+  copy:
+    src: /tmp/promtail-linux-amd64
+    dest: /usr/local/bin/promtail
+    remote_src: yes
+    owner: root
+    group: root
+    mode: "0755"
+  notify: restart promtail
+
+- name: Create promtail config directory
+  file:
+    path: /etc/promtail
+    state: directory
+    mode: "0755"
+
+- name: Deploy promtail config
+  template:
+    src: promtail.yaml.j2
+    dest: /etc/promtail/promtail.yaml
+    mode: "0644"
+  notify: restart promtail
+
+- name: Create promtail systemd service
+  template:
+    src: promtail.service.j2
+    dest: /etc/systemd/system/promtail.service
+    mode: "0644"
+  notify: restart promtail
+
+- name: Enable and start promtail
+  systemd:
+    name: promtail
+    enabled: true
+    state: started
+    daemon_reload: true

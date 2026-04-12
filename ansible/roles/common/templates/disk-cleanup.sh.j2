@@ -1,0 +1,26 @@
+#!/bin/bash
+# Nettoyage automatique disque — déclenché par cron
+THRESHOLD=80
+
+USAGE=$(df / --output=pcent | tail -1 | tr -dc '0-9')
+
+if [ "$USAGE" -gt "$THRESHOLD" ]; then
+    # Nettoyage Docker
+    if command -v docker &> /dev/null; then
+        docker system prune -af --filter "until=72h" 2>/dev/null
+    fi
+
+    # Nettoyage containerd/crictl
+    if command -v crictl &> /dev/null; then
+        crictl rmi --prune 2>/dev/null
+    fi
+
+    # Nettoyage journaux
+    journalctl --vacuum-size=100M 2>/dev/null
+
+    # Nettoyage apt
+    apt-get autoremove -y 2>/dev/null
+    apt-get clean 2>/dev/null
+
+    logger "disk-cleanup: nettoyage effectue, usage etait ${USAGE}%"
+fi

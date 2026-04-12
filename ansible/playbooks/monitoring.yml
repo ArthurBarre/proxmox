@@ -4,3 +4,9 @@
   become: true
   roles:
     - node_exporter
+
+- name: Deploy promtail on all VMs
+  hosts: gateway,databases,docker_hosts
+  become: true
+  roles:
+    - promtail

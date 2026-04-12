@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: promtail
+  namespace: monitoring
+  labels:
+    app: promtail
+spec:
+  selector:
+    matchLabels:
+      app: promtail
+  template:
+    metadata:
+      labels:
+        app: promtail
+    spec:
+      serviceAccountName: promtail
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+      initContainers:
+        - name: skip-old-logs
+          image: busybox:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "positions:" > /positions/positions.yaml
+              for f in $(find /var/log/pods -name "*.log" 2>/dev/null); do
+                size=$(wc -c < "$f")
+                echo "  \"$f\": \"$size\"" >> /positions/positions.yaml
+              done
+              cat /positions/positions.yaml
+          volumeMounts:
+            - name: positions
+              mountPath: /positions
+            - name: pods-logs
+              mountPath: /var/log/pods
+              readOnly: true
+      containers:
+        - name: promtail
+          image: grafana/promtail:3.5.0
+          args:
+            - "-config.file=/etc/promtail/promtail.yaml"
+          ports:
+            - name: http
+              containerPort: 9080
+          volumeMounts:
+            - name: config
+              mountPath: /etc/promtail
+            - name: pods-logs
+              mountPath: /var/log/pods
+              readOnly: true
+            - name: positions
+              mountPath: /tmp
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "25m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+      volumes:
+        - name: config
+          configMap:
+            name: promtail-config
+        - name: pods-logs
+          hostPath:
+            path: /var/log/pods
+        - name: positions
+          emptyDir: {}
