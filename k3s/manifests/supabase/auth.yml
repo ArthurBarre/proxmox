@@ -75,6 +75,17 @@ spec:
               value: "/auth/v1/verify"
             - name: GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE
               value: "/auth/v1/verify"
+            - name: GOTRUE_EXTERNAL_GOOGLE_ENABLED
+              value: "true"
+            - name: GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID
+              value: "434089349956-5pd1ti6ihd8juu2o6355lv3nfoi8d779.apps.googleusercontent.com"
+            - name: GOTRUE_EXTERNAL_GOOGLE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-secrets
+                  key: google-oauth-secret
+            - name: GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI
+              value: "https://supabase.arthurbarre.fr/auth/v1/callback"
           resources:
             requests:
               memory: "64Mi"

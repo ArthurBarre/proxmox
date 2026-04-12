@@ -56,8 +56,11 @@ Playbooks disponibles : `site.yml` (tout), `base.yml`, `gateway.yml`, `db.yml`, 
 | 30091 | Grafana | monitoring |
 | 30092 | Ntfy | monitoring |
 | 30093 | Loki | monitoring |
+| 30094 | Supabase Kong (API) | supabase |
+| 30095 | Supabase Studio | supabase |
+| 30096 | We Talk | wetalk |
 
-Prochain port dispo : **30094**
+Prochain port dispo : **30097**
 
 ## Domaines & Traefik
 
@@ -71,11 +74,9 @@ Prochain port dispo : **30094**
 | `grafana.arthurbarre.fr` | 10.10.10.5:30091 | Tailscale only |
 | `headlamp.arthurbarre.fr` | 10.10.10.5:30090 | Tailscale only |
 | `ntfy.arthurbarre.fr` | 10.10.10.5:30092 | Tailscale only |
-
-Services Tailscale-only nécessitent une entrée `/etc/hosts` sur le client :
-```
-100.106.59.13 grafana.arthurbarre.fr headlamp.arthurbarre.fr ntfy.arthurbarre.fr
-```
+| `supabase.arthurbarre.fr` | 10.10.10.5:30094 | Public (rate-limit) |
+| `studio.supabase.arthurbarre.fr` | 10.10.10.5:30095 | Tailscale only |
+| `we-talk.arthurbarre.fr` | 10.10.10.5:30096 | Public (rate-limit) |
 
 Traefik config : `ansible/roles/traefik/templates/`
 Dashboard Traefik : `100.106.59.13:8080` (Tailscale uniquement)
