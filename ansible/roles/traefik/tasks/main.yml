@@ -97,6 +97,12 @@
     dest: "{{ traefik_config_dir }}/dynamic/ntfy.yml"
     mode: "0644"
 
+- name: Deploy supabase.arthurbarre.fr dynamic config
+  template:
+    src: supabase.yml.j2
+    dest: "{{ traefik_config_dir }}/dynamic/supabase.yml"
+    mode: "0644"
+
 - name: Create Traefik systemd service
   template:
     src: traefik.service.j2

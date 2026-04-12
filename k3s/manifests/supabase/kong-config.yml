@@ -1,0 +1,155 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kong-config
+  namespace: supabase
+data:
+  kong.yml: |
+    _format_version: "2.1"
+    _transform: true
+
+    consumers:
+      - username: DASHBOARD
+      - username: anon
+        keyauth_credentials:
+          - key: SUPABASE_ANON_KEY_PLACEHOLDER
+      - username: service_role
+        keyauth_credentials:
+          - key: SUPABASE_SERVICE_KEY_PLACEHOLDER
+
+    acls:
+      - consumer: anon
+        group: anon
+      - consumer: service_role
+        group: admin
+
+    services:
+      # Auth
+      - name: auth-v1-open
+        url: http://supabase-auth.supabase.svc.cluster.local:9999/verify
+        routes:
+          - name: auth-v1-open
+            strip_path: true
+            paths:
+              - /auth/v1/verify
+        plugins:
+          - name: cors
+      - name: auth-v1-open-callback
+        url: http://supabase-auth.supabase.svc.cluster.local:9999/callback
+        routes:
+          - name: auth-v1-open-callback
+            strip_path: true
+            paths:
+              - /auth/v1/callback
+        plugins:
+          - name: cors
+      - name: auth-v1-open-authorize
+        url: http://supabase-auth.supabase.svc.cluster.local:9999/authorize
+        routes:
+          - name: auth-v1-open-authorize
+            strip_path: true
+            paths:
+              - /auth/v1/authorize
+        plugins:
+          - name: cors
+      - name: auth-v1
+        _comment: "GoTrue: /auth/v1/* -> :9999/*"
+        url: http://supabase-auth.supabase.svc.cluster.local:9999/
+        routes:
+          - name: auth-v1-all
+            strip_path: true
+            paths:
+              - /auth/v1/
+        plugins:
+          - name: cors
+          - name: key-auth
+            config:
+              hide_credentials: false
+          - name: acl
+            config:
+              hide_groups_header: true
+              allow:
+                - admin
+                - anon
+
+      # PostgREST
+      - name: rest-v1
+        _comment: "PostgREST: /rest/v1/* -> :3000/*"
+        url: http://supabase-rest.supabase.svc.cluster.local:3000/
+        routes:
+          - name: rest-v1-all
+            strip_path: true
+            paths:
+              - /rest/v1/
+        plugins:
+          - name: cors
+          - name: key-auth
+            config:
+              hide_credentials: false
+          - name: acl
+            config:
+              hide_groups_header: true
+              allow:
+                - admin
+                - anon
+
+      # Realtime
+      - name: realtime-v1
+        _comment: "Realtime: /realtime/v1/* -> :4000/socket/*"
+        url: http://supabase-realtime.supabase.svc.cluster.local:4000/socket/
+        routes:
+          - name: realtime-v1-all
+            strip_path: true
+            paths:
+              - /realtime/v1/
+        plugins:
+          - name: cors
+          - name: key-auth
+            config:
+              hide_credentials: false
+          - name: acl
+            config:
+              hide_groups_header: true
+              allow:
+                - admin
+                - anon
+
+      # Storage
+      - name: storage-v1
+        _comment: "Storage: /storage/v1/* -> :5000/*"
+        url: http://supabase-storage.supabase.svc.cluster.local:5000/
+        routes:
+          - name: storage-v1-all
+            strip_path: true
+            paths:
+              - /storage/v1/
+        plugins:
+          - name: cors
+          - name: key-auth
+            config:
+              hide_credentials: false
+          - name: acl
+            config:
+              hide_groups_header: true
+              allow:
+                - admin
+                - anon
+
+      # Meta (postgres-meta)
+      - name: meta
+        _comment: "pg-meta: /pg/* -> :8080/*"
+        url: http://supabase-meta.supabase.svc.cluster.local:8080/
+        routes:
+          - name: meta-all
+            strip_path: true
+            paths:
+              - /pg/
+        plugins:
+          - name: key-auth
+            config:
+              hide_credentials: false
+          - name: acl
+            config:
+              hide_groups_header: true
+              allow:
+                - admin

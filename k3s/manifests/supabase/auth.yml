@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supabase-auth
+  namespace: supabase
+  labels:
+    app: supabase-auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supabase-auth
+  template:
+    metadata:
+      labels:
+        app: supabase-auth
+    spec:
+      containers:
+        - name: gotrue
+          image: supabase/gotrue:v2.170.0
+          ports:
+            - containerPort: 9999
+          env:
+            - name: API_EXTERNAL_URL
+              value: "https://supabase.arthurbarre.fr"
+            - name: GOTRUE_API_HOST
+              value: "0.0.0.0"
+            - name: GOTRUE_API_PORT
+              value: "9999"
+            - name: GOTRUE_DB_DRIVER
+              value: postgres
+            - name: GOTRUE_DB_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-secrets
+                  key: auth-db-uri
+            - name: GOTRUE_SITE_URL
+              value: "https://supabase.arthurbarre.fr"
+            - name: GOTRUE_URI_ALLOW_LIST
+              value: ""
+            - name: GOTRUE_DISABLE_SIGNUP
+              value: "false"
+            - name: GOTRUE_JWT_ADMIN_ROLES
+              value: service_role
+            - name: GOTRUE_JWT_AUD
+              value: authenticated
+            - name: GOTRUE_JWT_DEFAULT_GROUP_NAME
+              value: authenticated
+            - name: GOTRUE_JWT_EXP
+              value: "3600"
+            - name: GOTRUE_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-secrets
+                  key: jwt-secret
+            - name: GOTRUE_EXTERNAL_EMAIL_ENABLED
+              value: "true"
+            - name: GOTRUE_MAILER_AUTOCONFIRM
+              value: "true"
+            - name: GOTRUE_SMTP_ADMIN_EMAIL
+              value: "arthurbarre.js@gmail.com"
+            - name: GOTRUE_MAILER_URLPATHS_INVITE
+              value: "/auth/v1/verify"
+            - name: GOTRUE_MAILER_URLPATHS_CONFIRMATION
+              value: "/auth/v1/verify"
+            - name: GOTRUE_MAILER_URLPATHS_RECOVERY
+              value: "/auth/v1/verify"
+            - name: GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE
+              value: "/auth/v1/verify"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 9999
+            initialDelaySeconds: 15
+            periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: supabase-auth
+  namespace: supabase
+spec:
+  type: ClusterIP
+  selector:
+    app: supabase-auth
+  ports:
+    - port: 9999
+      targetPort: 9999

@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(nmap -Pn --top-ports 100 51.38.62.199)"
+      "Bash(nmap -Pn --top-ports 100 51.38.62.199)",
+      "Bash(kubectl --kubeconfig k3s/kubeconfig.yaml -n supabase delete job supabase-init-db)",
+      "Bash(kubectl --kubeconfig k3s/kubeconfig.yaml apply -f k3s/manifests/supabase/init-db-config.yml)"
     ]
   }
 }

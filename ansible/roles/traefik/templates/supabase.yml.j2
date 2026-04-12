@@ -1,0 +1,34 @@
+http:
+  routers:
+    supabase-api:
+      rule: "Host(`supabase.arthurbarre.fr`)"
+      entryPoints:
+        - websecure
+      service: supabase-api
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - security-headers
+        - rate-limit
+
+    supabase-studio:
+      rule: "Host(`studio.supabase.arthurbarre.fr`)"
+      entryPoints:
+        - websecure
+      service: supabase-studio
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - tailscale-only
+        - security-headers
+
+  services:
+    supabase-api:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.5:30094"
+
+    supabase-studio:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.5:30095"

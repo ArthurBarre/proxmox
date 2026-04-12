@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supabase-db
+  namespace: supabase
+  labels:
+    app: supabase-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supabase-db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: supabase-db
+    spec:
+      containers:
+        - name: postgres
+          image: supabase/postgres:15.8.1.060
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-secrets
+                  key: postgres-password
+            - name: POSTGRES_DB
+              value: postgres
+            - name: POSTGRES_HOST
+              value: /var/run/postgresql
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+              subPath: pgdata
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres"]
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: supabase-postgres-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: supabase-db
+  namespace: supabase
+spec:
+  type: ClusterIP
+  selector:
+    app: supabase-db
+  ports:
+    - port: 5432
+      targetPort: 5432
