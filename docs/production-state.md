@@ -23,6 +23,7 @@ doc du repo avec ce qui tourne effectivement sur le Proxmox.
 | `freedge` | Freedge proxy | NodePort `30082` |
 | `rebours` | Rebours (SSR + API + proxy) | NodePort `30083` |
 | `wetalk` | We Talk (podcast communautaire) | NodePort `30094` |
+| `anydrop` | AnyDrop (partage P2P) | NodePort `30097` |
 
 ## Services Docker actifs sur la VM `docker`
 
@@ -42,6 +43,7 @@ doc du repo avec ce qui tourne effectivement sur le Proxmox.
 - `freedge.app` → `10.10.10.5:30082`
 - `arthurbarre.fr` → `10.10.10.4:8082`
 - `we-talk.arthurbarre.fr` → K3s `10.10.10.5:30094`
+- `anydrop.arthurbarre.fr` → K3s `10.10.10.5:30097`
 
 ### Dérive live constatée
 

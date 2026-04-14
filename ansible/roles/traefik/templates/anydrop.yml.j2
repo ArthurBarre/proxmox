@@ -1,0 +1,19 @@
+# Dynamic config — anydrop.arthurbarre.fr → AnyDrop (K3s NodePort)
+http:
+  routers:
+    anydrop:
+      rule: "Host(`anydrop.arthurbarre.fr`) || Host(`www.anydrop.arthurbarre.fr`)"
+      entryPoints:
+        - websecure
+      service: anydrop
+      middlewares:
+        - security-headers
+        - rate-limit
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    anydrop:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.5:30097"

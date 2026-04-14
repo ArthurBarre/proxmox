@@ -59,8 +59,9 @@ Playbooks disponibles : `site.yml` (tout), `base.yml`, `gateway.yml`, `db.yml`, 
 | 30094 | Supabase Kong (API) | supabase |
 | 30095 | Supabase Studio | supabase |
 | 30096 | We Talk | wetalk |
+| 30097 | AnyDrop | anydrop |
 
-Prochain port dispo : **30097**
+Prochain port dispo : **30098**
 
 ## Domaines & Traefik
 
@@ -77,6 +78,7 @@ Prochain port dispo : **30097**
 | `supabase.arthurbarre.fr` | 10.10.10.5:30094 | Public (rate-limit) |
 | `studio.supabase.arthurbarre.fr` | 10.10.10.5:30095 | Tailscale only |
 | `we-talk.arthurbarre.fr` | 10.10.10.5:30096 | Public (rate-limit) |
+| `anydrop.arthurbarre.fr` | 10.10.10.5:30097 | Public (rate-limit) |
 
 Traefik config : `ansible/roles/traefik/templates/`
 Dashboard Traefik : `100.106.59.13:8080` (Tailscale uniquement)
@@ -98,7 +100,54 @@ Dashboard Traefik : `100.106.59.13:8080` (Tailscale uniquement)
 3. Ajouter la tâche de déploiement dans `ansible/roles/traefik/tasks/main.yml`
 4. `kubectl apply -f k3s/manifests/<namespace>/ --kubeconfig k3s/kubeconfig.yaml`
 5. `cd ansible && ansible-playbook playbooks/gateway.yml`
-6. Ajouter le DNS chez OVH
+6. Créer le DNS via l'API OVH (automatisé, voir ci-dessous)
+
+## Gitea API (repos + Actions secrets)
+
+Token stocké dans `~/.config/gitea/token` (raw token, une ligne). Registry password pour le CI : `source <proxmox-repo>/.secrets` → exporte `REGISTRY_PASSWORD`.
+
+```bash
+GITEA_TOKEN=$(cat ~/.config/gitea/token)
+# Créer un repo
+curl -s -X POST "https://git.arthurbarre.fr/api/v1/user/repos" \
+  -H "Authorization: token $GITEA_TOKEN" -H "Content-Type: application/json" \
+  -d '{"name":"<app>","private":false,"auto_init":false}'
+# Ajouter un secret Actions
+curl -s -X PUT "https://git.arthurbarre.fr/api/v1/repos/ordinarthur/<app>/actions/secrets/<NAME>" \
+  -H "Authorization: token $GITEA_TOKEN" -H "Content-Type: application/json" \
+  -d "{\"data\":\"$VALUE\"}"
+```
+
+## KUBECONFIG pour le CI
+
+Le Act Runner tourne sur la VM worker et doit joindre l'API K3s via l'IP interne (pas `127.0.0.1`). Récupération automatisée :
+
+```bash
+KUBECONFIG_B64=$(ssh arthur@100.78.207.119 "sudo cat /etc/rancher/k3s/k3s.yaml" \
+  | sed 's/127.0.0.1/10.10.10.5/' | base64)
+# Puis push dans le secret Gitea KUBECONFIG (voir ci-dessus)
+```
+
+Premier SSH Tailscale de la session peut demander une auth navigateur — une fois validé, les appels suivants sont passwordless.
+
+## OVH DNS API
+
+Credentials stockés dans `~/.config/ovh/credentials.env` (Application Key, Secret, Consumer Key).
+
+Création automatique d'un A record :
+```bash
+source ~/.config/ovh/credentials.env
+ZONE="arthurbarre.fr" SUBDOMAIN="<sub>" TARGET="51.38.62.199"
+METHOD="POST" URL="https://eu.api.ovh.com/1.0/domain/zone/$ZONE/record"
+BODY="{\"fieldType\":\"A\",\"subDomain\":\"$SUBDOMAIN\",\"target\":\"$TARGET\",\"ttl\":3600}"
+TSTAMP=$(date +%s)
+SIG="\$1\$$(printf "${OVH_APPLICATION_SECRET}+${OVH_CONSUMER_KEY}+${METHOD}+${URL}+${BODY}+${TSTAMP}" | shasum -a 1 | cut -d' ' -f1)"
+curl -s -X POST -H "Content-Type: application/json" \
+  -H "X-Ovh-Application: $OVH_APPLICATION_KEY" -H "X-Ovh-Timestamp: $TSTAMP" \
+  -H "X-Ovh-Signature: $SIG" -H "X-Ovh-Consumer: $OVH_CONSUMER_KEY" \
+  -d "$BODY" "$URL"
+# Puis refresh la zone (même pattern avec POST /domain/zone/$ZONE/refresh)
+```
 
 ## Conventions
 

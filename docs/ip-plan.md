@@ -11,7 +11,8 @@
 | 10.10.10.5 | k3s-master | K3s control plane | 103 | 100.78.207.119 |
 | 10.10.10.6 | k3s-worker | K3s worker + Docker pour Act Runner | 104 | — |
 | 10.10.10.7-9 | k3s-worker-N | K3s workers additionnels (réservé) | 105-107 | — |
-| 10.10.10.10+ | — | VMs à la volée (Terraform) | 110+ | — |
+| 10.10.10.10 | pi-gen | Build d'images SD Raspberry Pi | 110 | — |
+| 10.10.10.11+ | — | VMs à la volée (Terraform) | 111+ | — |
 
 ## Ports exposés sur IP publique (51.38.62.199)
 
@@ -37,6 +38,7 @@
 | 30083 | k3s (NodePort) | Rebours |
 | 8082 | docker | arthurbarre.fr (portfolio legacy) |
 | 30094 | k3s (NodePort) | We Talk |
+| 30097 | k3s (NodePort) | AnyDrop |
 | 9000-9001 | docker | MinIO (usage interne / admin) |
 
 ## Convention de noms de domaine
@@ -63,3 +65,4 @@ Lors du déploiement d'un nouveau service, le skill doit demander (via `AskUserQ
 | `douzoute.arthurbarre.fr` | Portfolio Douzoute | K3s NodePort (10.10.10.5:30081) |
 | `freedge.app` | Freedge | K3s NodePort (10.10.10.5:30082) |
 | `we-talk.arthurbarre.fr` | We Talk (podcast communautaire) | K3s NodePort (10.10.10.5:30094) |
+| `anydrop.arthurbarre.fr` | AnyDrop (partage P2P) | K3s NodePort (10.10.10.5:30097) |

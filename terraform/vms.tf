@@ -25,6 +25,8 @@ resource "proxmox_virtual_environment_vm" "vm" {
   }
 
   initialization {
+    datastore_id = "local"
+
     ip_config {
       ipv4 {
         address = "${each.value.ip}/24"
@@ -49,7 +51,7 @@ resource "proxmox_virtual_environment_vm" "vm" {
 
   disk {
     interface    = "scsi0"
-    datastore_id = "local-lvm"
+    datastore_id = "local"
     size         = each.value.disk_gb
   }
 

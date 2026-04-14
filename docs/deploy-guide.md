@@ -71,9 +71,15 @@ Autres VMs :
 | 30081 | Douzoute |
 | 30082 | Freedge |
 | 30083 | Rebours |
-| 30094 | We Talk |
+| 30090 | Headlamp |
+| 30091 | Grafana |
+| 30092 | Ntfy |
+| 30093 | Loki |
+| 30094 | Supabase Kong (API) |
+| 30095 | Supabase Studio |
+| 30096 | We Talk |
 
-Le prochain NodePort disponible : **30095**.
+Le prochain NodePort disponible : **30097**.
 
 ---
 
@@ -365,13 +371,40 @@ Secrets supplementaires (selon le projet) : ajouter manuellement dans Gitea → 
 
 ### 7. DNS
 
-Ajouter un **A record** chez OVH :
+Les records DNS sont créés automatiquement via l'API OVH. Les credentials sont stockés dans `~/.config/ovh/credentials.env`.
 
-| Type | Nom | Valeur | TTL |
-|---|---|---|---|
-| A | `<subdomain>` | `51.38.62.199` | 3600 |
+```bash
+source ~/.config/ovh/credentials.env
+ZONE="arthurbarre.fr"
+SUBDOMAIN="<subdomain>"
+TARGET="51.38.62.199"
 
-Pour un domaine dedie (ex: `freedge.app`), configurer les NS ou A record chez le registrar du domaine.
+# Créer le record A
+METHOD="POST"
+URL="https://eu.api.ovh.com/1.0/domain/zone/$ZONE/record"
+BODY="{\"fieldType\":\"A\",\"subDomain\":\"$SUBDOMAIN\",\"target\":\"$TARGET\",\"ttl\":3600}"
+TSTAMP=$(date +%s)
+SIG="\$1\$$(printf "${OVH_APPLICATION_SECRET}+${OVH_CONSUMER_KEY}+${METHOD}+${URL}+${BODY}+${TSTAMP}" | shasum -a 1 | cut -d' ' -f1)"
+curl -s -X POST -H "Content-Type: application/json" \
+  -H "X-Ovh-Application: $OVH_APPLICATION_KEY" \
+  -H "X-Ovh-Timestamp: $TSTAMP" \
+  -H "X-Ovh-Signature: $SIG" \
+  -H "X-Ovh-Consumer: $OVH_CONSUMER_KEY" \
+  -d "$BODY" "$URL"
+
+# Rafraîchir la zone
+METHOD="POST"
+URL="https://eu.api.ovh.com/1.0/domain/zone/$ZONE/refresh"
+TSTAMP=$(date +%s)
+SIG="\$1\$$(printf "${OVH_APPLICATION_SECRET}+${OVH_CONSUMER_KEY}+${METHOD}+${URL}++${TSTAMP}" | shasum -a 1 | cut -d' ' -f1)"
+curl -s -X POST -H "X-Ovh-Application: $OVH_APPLICATION_KEY" \
+  -H "X-Ovh-Timestamp: $TSTAMP" \
+  -H "X-Ovh-Signature: $SIG" \
+  -H "X-Ovh-Consumer: $OVH_CONSUMER_KEY" \
+  "$URL"
+```
+
+Pour un domaine dédié (ex: `freedge.app`), configurer les NS ou A record chez le registrar du domaine.
 
 ### 8. Verification
 

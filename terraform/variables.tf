@@ -111,5 +111,13 @@ variable "vms" {
       ip      = "10.10.10.5"
       tags    = ["k3s", "kubernetes"]
     }
+    pi-gen = {
+      vmid    = 110
+      cores   = 4
+      memory  = 4096
+      disk_gb = 40
+      ip      = "10.10.10.10"
+      tags    = ["build", "pi-gen"]
+    }
   }
 }
