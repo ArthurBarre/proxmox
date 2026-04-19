@@ -1,0 +1,21 @@
+# Dynamic config — claude.arthurbarre.fr → HolyClaude (Claude Code web UI)
+# Tailscale only : le pod a potentiellement accès à kubectl/SSH infra,
+# blast radius énorme si leaké. Pas d'exposition publique.
+http:
+  routers:
+    holyclaude:
+      rule: "Host(`claude.arthurbarre.fr`)"
+      entryPoints:
+        - websecure
+      service: holyclaude
+      middlewares:
+        - tailscale-only
+        - security-headers
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    holyclaude:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.5:30106"

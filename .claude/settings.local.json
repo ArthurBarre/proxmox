@@ -6,7 +6,30 @@
       "Bash(kubectl --kubeconfig k3s/kubeconfig.yaml apply -f k3s/manifests/supabase/init-db-config.yml)",
       "Bash(kubectl --kubeconfig /Users/arthurbarre/dev/perso/proxmox/k3s/kubeconfig.yaml -n supabase get pods)",
       "WebFetch(domain:hub.docker.com)",
-      "Bash(kubectl --kubeconfig k3s/kubeconfig.yaml get nodes)"
+      "Bash(kubectl --kubeconfig k3s/kubeconfig.yaml get nodes)",
+      "Bash(ssh arthur@100.106.59.13 \"ls /etc/traefik/dynamic/ 2>&1 && echo '---' && cat /etc/traefik/dynamic/uptime.yml 2>&1\")",
+      "Bash(ssh arthur@100.79.77.93 \"ss -tlnp 2>/dev/null | grep 3001 ; docker ps --format 'table {{.Names}}\\\\t{{.Status}}\\\\t{{.Ports}}' 2>/dev/null | grep -i kuma\")",
+      "Bash(ssh arthur@100.106.59.13 \"curl -s -o /dev/null -w 'kuma direct: %{http_code}\\\\n' http://10.10.10.4:3001/\")",
+      "Bash(ansible-playbook playbooks/gateway.yml)",
+      "WebSearch",
+      "WebFetch(domain:holyclaude.coderluii.dev)",
+      "WebFetch(domain:github.com)",
+      "Bash(export KUBECONFIG=/Users/arthurbarre/dev/perso/proxmox/k3s/kubeconfig.yaml)",
+      "Bash(kubectl -n holyclaude get pods,pvc,svc -o wide)",
+      "Bash(kubectl -n holyclaude get pods)",
+      "Bash(kubectl -n holyclaude describe pod -l app=holyclaude)",
+      "Bash(dig +short claude.arthurbarre.fr @1.1.1.1)",
+      "Bash(curl -sI https://claude.arthurbarre.fr/)",
+      "Bash(curl -sI --resolve claude.arthurbarre.fr:443:51.38.62.199 https://claude.arthurbarre.fr/ -H \"X-Forwarded-For: 1.2.3.4\")",
+      "Bash(curl -sI --resolve claude.arthurbarre.fr:443:100.106.59.13 https://claude.arthurbarre.fr/)",
+      "Bash(ssh arthur@100.78.207.119 \"curl -sI --resolve claude.arthurbarre.fr:443:100.106.59.13 https://claude.arthurbarre.fr/ -k 2>&1 | head -5\")",
+      "Bash(dig +short claude.arthurbarre.fr)",
+      "Bash(curl -sIv https://claude.arthurbarre.fr/)",
+      "Bash(sudo dscacheutil *)",
+      "Bash(sudo killall *)",
+      "Bash(dig +short claude.arthurbarre.fr @8.8.8.8)",
+      "Bash(tailscale status *)",
+      "Bash(ssh arthur@100.106.59.13 \"sudo tail -20 /var/log/traefik/access.log 2>/dev/null | grep -i claude || sudo journalctl -u traefik -n 50 --no-pager | grep -i claude | tail -10\")"
     ]
   }
 }
