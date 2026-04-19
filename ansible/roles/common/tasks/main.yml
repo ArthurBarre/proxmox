@@ -85,3 +85,43 @@
   register: tailscale_result
   changed_when: "'already' not in tailscale_result.stderr"
   failed_when: false
+
+# ---------------------------------------------------------------------------
+# DNS fix: Tailscale MagicDNS (100.100.100.100) est instable et casse la
+# résolution DNS au reboot (images docker KO, pods ImagePullBackOff).
+# On désactive MagicDNS et on force un resolv.conf figé + immutable pour que
+# tailscaled ne puisse plus l'écraser.
+# ---------------------------------------------------------------------------
+- name: Disable Tailscale MagicDNS override
+  command: tailscale set --accept-dns=false
+  changed_when: false
+  failed_when: false
+
+- name: Stop systemd-resolved (empêche toute réécriture du resolv.conf)
+  systemd:
+    name: systemd-resolved
+    enabled: false
+    state: stopped
+  failed_when: false
+
+- name: Remove immutable flag before rewriting resolv.conf
+  command: chattr -i /etc/resolv.conf
+  changed_when: false
+  failed_when: false
+
+- name: Write pinned /etc/resolv.conf (1.1.1.1 + 8.8.8.8)
+  copy:
+    dest: /etc/resolv.conf
+    content: |
+      # Managed by Ansible — DO NOT EDIT (immutable, use chattr -i to modify)
+      nameserver 1.1.1.1
+      nameserver 8.8.8.8
+      nameserver 9.9.9.9
+      options timeout:2 attempts:2
+    mode: "0644"
+  register: resolv_written
+
+- name: Make /etc/resolv.conf immutable
+  command: chattr +i /etc/resolv.conf
+  changed_when: resolv_written.changed
+  failed_when: false

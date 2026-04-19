@@ -1,0 +1,33 @@
+# Dynamic config — MinIO (S3 public + Console Tailscale-only)
+http:
+  routers:
+    minio-s3:
+      rule: "Host(`minio.arthurbarre.fr`)"
+      entryPoints:
+        - websecure
+      service: minio-s3
+      middlewares:
+        - rate-limit
+      tls:
+        certResolver: letsencrypt
+
+    minio-console:
+      rule: "Host(`minio-console.arthurbarre.fr`)"
+      entryPoints:
+        - websecure
+      service: minio-console
+      middlewares:
+        - rate-limit
+        - security-headers
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    minio-s3:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.5:30102"
+    minio-console:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.5:30103"

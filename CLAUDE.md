@@ -14,9 +14,9 @@ Hôte Proxmox : `ns3142338` — SSH via `ssh root@100.78.114.17` (Tailscale)
 |-------|-----|-----------|--------------|------|-----|--------|
 | 100 | gateway | 10.10.10.2 | 100.106.59.13 | Traefik reverse proxy | 1G | 10G |
 | 101 | db | 10.10.10.3 | 100.114.242.60 | PostgreSQL 15 | 2G | 30G |
-| 102 | docker | 10.10.10.4 | 100.79.77.93 | Docker legacy (portfolio, uptime-kuma) | 4G | 40G |
-| 103 | k3s-master | 10.10.10.5 | 100.78.207.119 | K3s control plane | 4G | 30G |
-| 104 | k3s-worker | 10.10.10.6 | 100.121.251.87 | K3s worker node | 4G | 30G |
+| 102 | monitor | 10.10.10.4 | 100.79.77.93 | Uptime-Kuma (host dédié monitoring, hors K3s) | 4G | 40G |
+| 103 | k3s-master | 10.10.10.5 | 100.78.207.119 | K3s control plane | 4G | 100G |
+| 104 | k3s-worker | 10.10.10.6 | — (pas de Tailscale) | K3s worker node | 4G | 100G |
 
 ## Accès SSH
 
@@ -60,8 +60,13 @@ Playbooks disponibles : `site.yml` (tout), `base.yml`, `gateway.yml`, `db.yml`, 
 | 30095 | Supabase Studio | supabase |
 | 30096 | We Talk | wetalk |
 | 30097 | AnyDrop | anydrop |
+| 30099 | ordinarthur-os PWA | ordinarthur-os |
+| 30100 | ordinarthur-os API | ordinarthur-os |
+| 30101 | Portfolio (arthurbarre.fr) | portfolio |
+| 30102 | MinIO S3 API | minio |
+| 30103 | MinIO Console | minio |
 
-Prochain port dispo : **30098**
+Prochain port dispo : **30104**
 
 ## Domaines & Traefik
 
@@ -71,7 +76,10 @@ Prochain port dispo : **30098**
 | `freedge.app` | 10.10.10.5:30082 | Public (rate-limit) |
 | `rebours.studio` | 10.10.10.5:30083 | Public (rate-limit) |
 | `douzoute.arthurbarre.fr` | 10.10.10.5:30081 | Public (rate-limit) |
-| `arthurbarre.fr` | 10.10.10.4:8082 | Public (rate-limit, Docker legacy) |
+| `arthurbarre.fr` | 10.10.10.5:30101 | Public (rate-limit) |
+| `minio.arthurbarre.fr` | 10.10.10.5:30102 | Public (rate-limit, S3 API) |
+| `minio-console.arthurbarre.fr` | 10.10.10.5:30103 | Public (login MinIO admin) |
+| `uptime.arthurbarre.fr` | 10.10.10.4:3001 | Public (login Uptime-Kuma) |
 | `grafana.arthurbarre.fr` | 10.10.10.5:30091 | Tailscale only |
 | `headlamp.arthurbarre.fr` | 10.10.10.5:30090 | Tailscale only |
 | `ntfy.arthurbarre.fr` | 10.10.10.5:30092 | Tailscale only |

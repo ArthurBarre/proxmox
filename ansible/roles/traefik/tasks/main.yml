@@ -115,6 +115,24 @@
     dest: "{{ traefik_config_dir }}/dynamic/anydrop.yml"
     mode: "0644"
 
+- name: Deploy ordinarthur-os (os + api.os) dynamic config
+  template:
+    src: ordinarthur-os.yml.j2
+    dest: "{{ traefik_config_dir }}/dynamic/ordinarthur-os.yml"
+    mode: "0644"
+
+- name: Deploy uptime.arthurbarre.fr dynamic config
+  template:
+    src: uptime.yml.j2
+    dest: "{{ traefik_config_dir }}/dynamic/uptime.yml"
+    mode: "0644"
+
+- name: Deploy MinIO (s3 + console) dynamic config
+  template:
+    src: minio.yml.j2
+    dest: "{{ traefik_config_dir }}/dynamic/minio.yml"
+    mode: "0644"
+
 - name: Create Traefik systemd service
   template:
     src: traefik.service.j2

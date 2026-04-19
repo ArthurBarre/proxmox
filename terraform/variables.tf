@@ -95,13 +95,13 @@ variable "vms" {
       ip      = "10.10.10.3"
       tags    = ["postgresql", "database"]
     }
-    docker = {
+    monitor = {
       vmid    = 102
       cores   = 2
       memory  = 4096
       disk_gb = 40
       ip      = "10.10.10.4"
-      tags    = ["docker", "apps"]
+      tags    = ["monitoring", "uptime-kuma"]
     }
     k3s-master = {
       vmid    = 103

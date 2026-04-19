@@ -1,0 +1,21 @@
+# Dynamic config — uptime.arthurbarre.fr → Uptime-Kuma
+# Public : protégé par le login Uptime-Kuma natif (pas de tailscale-only pour
+# pouvoir y accéder depuis iPhone hors Tailscale en cas d'incident).
+http:
+  routers:
+    uptime:
+      rule: "Host(`uptime.arthurbarre.fr`)"
+      entryPoints:
+        - websecure
+      service: uptime
+      middlewares:
+        - rate-limit
+        - security-headers
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    uptime:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.4:3001"

@@ -1,0 +1,29 @@
+# Dynamic config — os.arthurbarre.fr (PWA) + api.os.arthurbarre.fr (API)
+http:
+  routers:
+    ordinarthur-os-pwa:
+      rule: "Host(`os.arthurbarre.fr`)"
+      entryPoints: [websecure]
+      service: ordinarthur-os-pwa
+      middlewares: [security-headers, rate-limit]
+      tls:
+        certResolver: letsencrypt
+
+    ordinarthur-os-api:
+      rule: "Host(`api.os.arthurbarre.fr`)"
+      entryPoints: [websecure]
+      service: ordinarthur-os-api
+      middlewares: [security-headers, rate-limit]
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    ordinarthur-os-pwa:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.5:30099"
+
+    ordinarthur-os-api:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.5:30100"
