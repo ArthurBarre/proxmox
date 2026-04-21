@@ -27,6 +27,35 @@ spec:
               readOnly: true
             - name: config-writable
               mountPath: /etc/gitea
+        - name: install-catppuccin
+          image: alpine:3.20
+          env:
+            - name: CATPPUCCIN_VERSION
+              value: v1.0.2
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              CSS_DIR=/var/lib/gitea/custom/public/assets/css
+              STAMP="$CSS_DIR/.catppuccin-${CATPPUCCIN_VERSION}"
+              if [ -f "$STAMP" ]; then
+                echo "Catppuccin ${CATPPUCCIN_VERSION} already installed, skipping."
+                exit 0
+              fi
+              apk add --no-cache curl tar
+              mkdir -p "$CSS_DIR"
+              rm -f "$CSS_DIR"/theme-catppuccin-*.css "$CSS_DIR"/.catppuccin-*
+              cd /tmp
+              curl -fsSL -o catppuccin-gitea.tar.gz \
+                "https://github.com/catppuccin/gitea/releases/download/${CATPPUCCIN_VERSION}/catppuccin-gitea.tar.gz"
+              tar xzf catppuccin-gitea.tar.gz
+              cp theme-catppuccin-*.css "$CSS_DIR/"
+              touch "$STAMP"
+              echo "Installed $(ls "$CSS_DIR"/theme-catppuccin-*.css | wc -l) Catppuccin CSS files."
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/gitea
       containers:
         - name: gitea
           image: gitea/gitea:1.23-rootless
