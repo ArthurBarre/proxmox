@@ -1,17 +1,21 @@
-# Production State — 11 avril 2026
+# Production State — 21 avril 2026
 
 Cette page documente l'état réel constaté sur l'infra live afin d'aligner la
 doc du repo avec ce qui tourne effectivement sur le Proxmox.
 
 ## VMs actives
 
-| VM ID | Nom | IP privée | Rôle |
-|---|---|---|---|
-| 100 | gateway | 10.10.10.2 | Traefik public |
-| 101 | db | 10.10.10.3 | PostgreSQL 15 |
-| 102 | docker | 10.10.10.4 | Services legacy Docker |
-| 103 | k3s-master | 10.10.10.5 | Control plane K3s |
-| 104 | k3s-worker | 10.10.10.6 | Worker K3s + Act Runner |
+| VM ID | Nom | IP privée | RAM | CPU | Disque | Rôle |
+|---|---|---|---|---|---|---|
+| 100 | gateway | 10.10.10.2 | 1 Go | 1 | 10 Go | Traefik public |
+| 101 | db | 10.10.10.3 | 2 Go | 2 | 30 Go | PostgreSQL 15 |
+| 102 | docker | 10.10.10.4 | 4 Go | 2 | 40 Go | Services legacy Docker |
+| 103 | k3s-master | 10.10.10.5 | 4 Go | 2 | 30 Go | Control plane K3s + workloads |
+| 104 | k3s-worker | 10.10.10.6 | **8 Go** (+ 2 Go swap) | 2 | — | Worker K3s + Gitea + Act Runner |
+
+> **Note RAM worker** : bumpée de 4 Go → 8 Go le 21 avril 2026 suite à un OOM
+> kill du pod Gitea pendant un build CI (voir section "Incidents" plus bas).
+> Ballooning désactivé (`--balloon 0`) pour garantir les 8 Go en permanence.
 
 ## Services K3s actifs
 
@@ -97,6 +101,29 @@ du host gateway.
 - Les services internes (Gitea, Supabase, K3s) sont sur le réseau Tailscale et **ne sont PAS accessibles depuis Claude Code**
 - Les opérations réseau (git push, curl vers Gitea/Supabase, kubectl) doivent être exécutées **manuellement par l'utilisateur**
 - Le skill deploy doit générer les commandes et les présenter à l'utilisateur, sans tenter de les exécuter
+
+## Incidents et runbooks
+
+### 21 avril 2026 — OOM kill sur k3s-worker
+
+**Symptôme** : `git.arthurbarre.fr` retourne 502 Bad Gateway, `kubectl get nodes`
+montre `k3s-worker NotReady`. SSH vers le worker timeout.
+
+**Cause racine** : pression mémoire — la VM avait 4 Go RAM sans swap. Le build
+Docker d'une image CI (Next.js + Payload) a fait déborder la RAM. OOM killer a
+tué le pod Gitea, puis systemd-logind est devenu indisponible, et kubelet a
+arrêté de poster son status au master.
+
+**Résolution** :
+1. `ssh arthur@100.78.207.119 "sudo kubectl cordon k3s-worker && sudo kubectl drain k3s-worker --ignore-daemonsets --delete-emptydir-data --force"`
+2. `ssh root@100.78.114.17 "qm reset 104"` (hard reset, guest agent down)
+3. `ssh root@100.78.114.17 "qm set 104 --memory 8192 --balloon 0"` + redémarrage
+4. Ajout de 2 Go swap sur le worker (`/swapfile` persisté dans `/etc/fstab`)
+5. `sudo kubectl uncordon k3s-worker`
+
+**Prévention** : le worker a maintenant 8 Go + 2 Go swap. Pour éviter le retour
+du problème, ajouter des `resources.limits.memory` sur les pods gros consommateurs
+(Gitea, Act Runner) reste recommandé.
 
 ## Modèle de déploiement actuel
 

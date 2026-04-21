@@ -111,6 +111,14 @@ variable "vms" {
       ip      = "10.10.10.5"
       tags    = ["k3s", "kubernetes"]
     }
+    k3s-worker = {
+      vmid    = 104
+      cores   = 2
+      memory  = 8192 # bumpé de 4 → 8 Go le 21/04/2026 suite à OOM (voir docs/production-state.md)
+      disk_gb = 100
+      ip      = "10.10.10.6"
+      tags    = ["k3s", "kubernetes", "worker"]
+    }
     pi-gen = {
       vmid    = 110
       cores   = 4

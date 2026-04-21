@@ -446,15 +446,15 @@
         </div>
         <div class="vm-service"><em>Docker 29.4</em> + Compose</div>
         <div class="vm-tags">
-          <span class="tag tag-green">rebours.studio</span>
           <span class="tag tag-orange">Uptime Kuma</span>
+          <span class="tag tag-orange">MinIO</span>
           <span class="tag tag-blue">2 cores</span>
           <span class="tag tag-blue">4 Go</span>
         </div>
         <div class="vm-ips">
           <span>priv</span> 10.10.10.4<br>
           <span>ts</span> 100.79.77.93<br>
-          <span>apps</span> :8080 (nginx) · :3001 (monitoring)
+          <span>apps</span> :3001 (monitoring) · :9000 (minio)
         </div>
       </div>
       
@@ -486,6 +486,8 @@
         <div class="vm-service"><em>K3s v1.34</em> — Kubernetes</div>
         <div class="vm-tags">
           <span class="tag tag-purple">control plane</span>
+          <span class="tag tag-green">rebours.studio</span>
+          <span class="tag tag-green">freedge.app</span>
           <span class="tag tag-blue">2 cores</span>
           <span class="tag tag-blue">4 Go</span>
         </div>
@@ -495,7 +497,27 @@
           <span>api</span> :6443 (kubectl)
         </div>
       </div>
-      
+
+      <div class="vm">
+        <div class="vm-header">
+          <div class="vm-dot"></div>
+          <div class="vm-title">k3s-worker</div>
+          <div class="vm-id">VM 104</div>
+        </div>
+        <div class="vm-service"><em>K3s worker</em> — Gitea + Act Runner</div>
+        <div class="vm-tags">
+          <span class="tag tag-purple">worker</span>
+          <span class="tag tag-green">git.arthurbarre.fr</span>
+          <span class="tag tag-blue">2 cores</span>
+          <span class="tag tag-blue">8 Go + 2 Go swap</span>
+        </div>
+        <div class="vm-ips">
+          <span>priv</span> 10.10.10.6<br>
+          <span>ts</span> — (réseau privé uniquement)<br>
+          <span>pods</span> Gitea · Act Runner · monitoring
+        </div>
+      </div>
+
     </div>
     
     <!-- Traffic flow -->

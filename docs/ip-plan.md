@@ -2,17 +2,17 @@
 
 ## Réseau privé — 10.10.10.0/24 (vmbr1)
 
-| IP | Hostname | Rôle | VM ID | Tailscale |
-|---|---|---|---|---|
-| 10.10.10.1 | proxmox | Hyperviseur (host) | — | 100.78.114.17 |
-| 10.10.10.2 | gateway | Traefik v3.4 (reverse proxy) | 100 | 100.106.59.13 |
-| 10.10.10.3 | db | PostgreSQL 15 | 101 | 100.114.242.60 |
-| 10.10.10.4 | docker | Docker host (monitoring) | 102 | 100.79.77.93 |
-| 10.10.10.5 | k3s-master | K3s control plane | 103 | 100.78.207.119 |
-| 10.10.10.6 | k3s-worker | K3s worker + Docker pour Act Runner | 104 | — |
-| 10.10.10.7-9 | k3s-worker-N | K3s workers additionnels (réservé) | 105-107 | — |
-| 10.10.10.10 | pi-gen | Build d'images SD Raspberry Pi | 110 | — |
-| 10.10.10.11+ | — | VMs à la volée (Terraform) | 111+ | — |
+| IP | Hostname | Rôle | VM ID | RAM | Tailscale |
+|---|---|---|---|---|---|
+| 10.10.10.1 | proxmox | Hyperviseur (host) | — | 32 Go | 100.78.114.17 |
+| 10.10.10.2 | gateway | Traefik v3.4 (reverse proxy) | 100 | 1 Go | 100.106.59.13 |
+| 10.10.10.3 | db | PostgreSQL 15 | 101 | 2 Go | 100.114.242.60 |
+| 10.10.10.4 | docker | Docker host (monitoring) | 102 | 4 Go | 100.79.77.93 |
+| 10.10.10.5 | k3s-master | K3s control plane + workloads | 103 | 4 Go | 100.78.207.119 |
+| 10.10.10.6 | k3s-worker | K3s worker + Gitea + Act Runner | 104 | **8 Go** (+ 2 Go swap) | — |
+| 10.10.10.7-9 | k3s-worker-N | K3s workers additionnels (réservé) | 105-107 | — | — |
+| 10.10.10.10 | pi-gen | Build d'images SD Raspberry Pi | 110 | 4 Go | — |
+| 10.10.10.11+ | — | VMs à la volée (Terraform) | 111+ | — | — |
 
 ## Ports exposés sur IP publique (51.38.62.199)
 

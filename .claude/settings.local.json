@@ -29,7 +29,12 @@
       "Bash(sudo killall *)",
       "Bash(dig +short claude.arthurbarre.fr @8.8.8.8)",
       "Bash(tailscale status *)",
-      "Bash(ssh arthur@100.106.59.13 \"sudo tail -20 /var/log/traefik/access.log 2>/dev/null | grep -i claude || sudo journalctl -u traefik -n 50 --no-pager | grep -i claude | tail -10\")"
+      "Bash(ssh arthur@100.106.59.13 \"sudo tail -20 /var/log/traefik/access.log 2>/dev/null | grep -i claude || sudo journalctl -u traefik -n 50 --no-pager | grep -i claude | tail -10\")",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(git add *)"
     ]
   }
 }
