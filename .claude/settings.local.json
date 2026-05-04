@@ -34,7 +34,28 @@
       "Bash(git push *)",
       "WebFetch(domain:api.github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(dig +short TXT resend._domainkey.arthurbarre.fr @ns109.ovh.net)",
+      "Bash(dig +short MX send.arthurbarre.fr @ns109.ovh.net)",
+      "Bash(dig +short TXT send.arthurbarre.fr @ns109.ovh.net)",
+      "Bash(dig +short TXT _dmarc.arthurbarre.fr @ns109.ovh.net)",
+      "Bash(dig +short CNAME relances.arthurbarre.fr @ns109.ovh.net)",
+      "Bash(dig +short TXT resend._domainkey.arthurbarre.fr @dns109.ovh.net)",
+      "Bash(dig +short MX send.arthurbarre.fr @dns109.ovh.net)",
+      "Bash(dig +short TXT send.arthurbarre.fr @dns109.ovh.net)",
+      "Bash(dig +short TXT _dmarc.arthurbarre.fr @dns109.ovh.net)",
+      "Bash(dig +short CNAME relances.arthurbarre.fr @dns109.ovh.net)",
+      "Bash(dig +short NS arthurbarre.fr)",
+      "Bash(dig +short TXT resend._domainkey.arthurbarre.fr @dns104.ovh.net)",
+      "Bash(dig +short MX send.arthurbarre.fr @dns104.ovh.net)",
+      "Bash(dig +short TXT send.arthurbarre.fr @dns104.ovh.net)",
+      "Bash(dig +short TXT _dmarc.arthurbarre.fr @dns104.ovh.net)",
+      "Bash(dig +short CNAME relances.arthurbarre.fr @dns104.ovh.net)",
+      "Bash(dig +short TXT resend._domainkey.arthurbarre.fr @8.8.8.8)",
+      "Bash(dig +short MX send.arthurbarre.fr @8.8.8.8)",
+      "Bash(dig +short TXT send.arthurbarre.fr @8.8.8.8)",
+      "Bash(dig +short TXT _dmarc.arthurbarre.fr @8.8.8.8)",
+      "Bash(dig +short CNAME relances.arthurbarre.fr @8.8.8.8)"
     ]
   }
 }

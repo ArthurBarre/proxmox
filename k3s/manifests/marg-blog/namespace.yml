@@ -1,0 +1,9 @@
+# =====================================================================
+# Namespace : un "dossier logique" qui isole les ressources de l'app.
+# Toutes les autres ressources (Deployment, Service, Secret) auront
+# `namespace: marg-blog` pour s'y rattacher.
+# =====================================================================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: marg-blog

@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: marg-blog-backend
+  namespace: marg-blog
+
+spec:
+  # ----------------------------------------------------------
+  # NodePort = expose le service sur un port fixe sur TOUS les
+  # nœuds K3s (master + worker). Traefik s'y connecte via
+  # 10.10.10.5:30107.
+  #
+  # Autres types possibles (info) :
+  #   ClusterIP : interne au cluster uniquement (cas MinIO)
+  #   LoadBalancer : crée un LB cloud (AWS ELB, etc.) — pas
+  #                  applicable sur du self-hosted nu sans MetalLB
+  # ----------------------------------------------------------
+  type: NodePort
+
+  # ----------------------------------------------------------
+  # Sélectionne les pods à qui router le trafic.
+  # DOIT correspondre au label des pods (cf. deployment).
+  # ----------------------------------------------------------
+  selector:
+    app: marg-blog-backend
+
+  ports:
+    - name: http
+      # port       : port du Service vu de l'INTÉRIEUR du cluster
+      #              (pour les autres pods qui voudraient l'appeler
+      #              via marg-blog-backend.marg-blog.svc.cluster.local)
+      port: 80
+      # targetPort : port du CONTAINER (cf. containerPort du pod)
+      targetPort: 3333
+      # nodePort   : port exposé sur les nœuds K3s, pour Traefik
+      nodePort: 30107
