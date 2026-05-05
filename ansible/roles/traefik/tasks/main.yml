@@ -79,6 +79,12 @@
     dest: "{{ traefik_config_dir }}/dynamic/freedge.yml"
     mode: "0644"
 
+- name: Deploy blog.margotadam.fr dynamic config
+  template:
+    src: marg-blog.yml.j2
+    dest: "{{ traefik_config_dir }}/dynamic/marg-blog.yml"
+    mode: "0644"
+
 - name: Deploy headlamp.arthurbarre.fr dynamic config
   template:
     src: headlamp.yml.j2

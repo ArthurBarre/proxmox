@@ -1,0 +1,35 @@
+# Dynamic config — blog.margotadam.fr (frontend) + api.blog.margotadam.fr (backend)
+http:
+  routers:
+    marg-blog-frontend:
+      rule: "Host(`blog.margotadam.fr`)"
+      entryPoints:
+        - websecure
+      service: marg-blog-frontend
+      middlewares:
+        - security-headers
+        - rate-limit
+      tls:
+        certResolver: letsencrypt
+
+    marg-blog-backend:
+      rule: "Host(`api.blog.margotadam.fr`)"
+      entryPoints:
+        - websecure
+      service: marg-blog-backend
+      middlewares:
+        - security-headers
+        - rate-limit
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    marg-blog-frontend:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.5:30108"
+
+    marg-blog-backend:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.5:30107"
