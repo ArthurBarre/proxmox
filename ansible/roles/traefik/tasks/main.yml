@@ -145,6 +145,18 @@
     dest: "{{ traefik_config_dir }}/dynamic/holyclaude.yml"
     mode: "0644"
 
+- name: Deploy rubis.arthurbarre.fr dynamic config
+  template:
+    src: rubis.yml.j2
+    dest: "{{ traefik_config_dir }}/dynamic/rubis.yml"
+    mode: "0644"
+
+- name: Deploy app.rubis.arthurbarre.fr dynamic config
+  template:
+    src: rubis-app.yml.j2
+    dest: "{{ traefik_config_dir }}/dynamic/rubis-app.yml"
+    mode: "0644"
+
 - name: Create Traefik systemd service
   template:
     src: traefik.service.j2

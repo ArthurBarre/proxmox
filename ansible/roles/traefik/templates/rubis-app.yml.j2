@@ -1,0 +1,19 @@
+# Dynamic config — app.rubis.arthurbarre.fr → Rubis SaaS app (K3s NodePort 30110)
+http:
+  routers:
+    rubis-app:
+      rule: "Host(`app.rubis.arthurbarre.fr`)"
+      entryPoints:
+        - websecure
+      service: rubis-app
+      middlewares:
+        - security-headers
+        - rate-limit
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    rubis-app:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.5:30110"

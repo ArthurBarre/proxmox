@@ -68,8 +68,12 @@ Playbooks disponibles : `site.yml` (tout), `base.yml`, `gateway.yml`, `db.yml`, 
 | 30104 | Prometheus | monitoring |
 | 30105 | AlertManager | monitoring |
 | 30106 | HolyClaude (Claude Code web UI) | holyclaude |
+| 30107 | marg-blog backend | marg-blog |
+| 30108 | marg-blog frontend | marg-blog |
+| 30109 | Rubis (landing) | rubis |
+| 30110 | Rubis (app SaaS) | rubis |
 
-Prochain port dispo : **30107**
+Prochain port dispo : **30111**
 
 ## Domaines & Traefik
 
@@ -91,6 +95,8 @@ Prochain port dispo : **30107**
 | `we-talk.arthurbarre.fr` | 10.10.10.5:30096 | Public (rate-limit) |
 | `anydrop.arthurbarre.fr` | 10.10.10.5:30097 | Public (rate-limit) |
 | `claude.arthurbarre.fr` | 10.10.10.5:30106 | Tailscale only (HolyClaude) |
+| `rubis.arthurbarre.fr` | 10.10.10.5:30109 | Public (rate-limit, landing temporaire) |
+| `app.rubis.arthurbarre.fr` | 10.10.10.5:30110 | Public (rate-limit, app SaaS Rubis) |
 
 Traefik config : `ansible/roles/traefik/templates/`
 Dashboard Traefik : `100.106.59.13:8080` (Tailscale uniquement)
