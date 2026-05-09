@@ -1,0 +1,43 @@
+# Dynamic config — rubis.pro → Rubis landing (Astro 6 SSR, K3s NodePort 30111).
+# L'ancien Host rubis.arthurbarre.fr fait un 301 redirect vers rubis.pro
+# pour ne pas casser les anciens liens. À retirer quand le DNS sera coupé.
+http:
+  routers:
+    rubis:
+      rule: "Host(`rubis.pro`)"
+      entryPoints:
+        - websecure
+      service: rubis
+      middlewares:
+        # IMPORTANT : `allow-indexing` doit précéder `security-headers`.
+        # Traefik applique les responseModifiers dans l'ordre inverse de la
+        # liste, donc le middleware listé en PREMIER voit la response en
+        # DERNIER → c'est lui qui écrit en dernier sur X-Robots-Tag.
+        - allow-indexing
+        - security-headers
+        - rate-limit
+      tls:
+        certResolver: letsencrypt
+
+    rubis-legacy-redirect:
+      rule: "Host(`rubis.arthurbarre.fr`)"
+      entryPoints:
+        - websecure
+      service: noop@internal
+      middlewares:
+        - rubis-legacy-to-pro
+      tls:
+        certResolver: letsencrypt
+
+  middlewares:
+    rubis-legacy-to-pro:
+      redirectRegex:
+        regex: "^https?://rubis\\.arthurbarre\\.fr/(.*)"
+        replacement: "https://rubis.pro/${1}"
+        permanent: true
+
+  services:
+    rubis:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.5:30111"

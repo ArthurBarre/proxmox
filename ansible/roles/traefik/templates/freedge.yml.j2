@@ -7,6 +7,10 @@ http:
         - websecure
       service: freedge
       middlewares:
+        # `allow-indexing` AVANT `security-headers` : Traefik applique les
+        # responseModifiers dans l'ordre inverse, donc le 1er listé écrit
+        # X-Robots-Tag en dernier → c'est lui qui gagne (cf. middlewares.yml.j2).
+        - allow-indexing
         - security-headers
         - rate-limit
       tls:
@@ -18,6 +22,10 @@ http:
         - websecure
       service: freedge
       middlewares:
+        # `allow-indexing` AVANT `security-headers` : Traefik applique les
+        # responseModifiers dans l'ordre inverse, donc le 1er listé écrit
+        # X-Robots-Tag en dernier → c'est lui qui gagne (cf. middlewares.yml.j2).
+        - allow-indexing
         - security-headers
         - rate-limit
       tls:

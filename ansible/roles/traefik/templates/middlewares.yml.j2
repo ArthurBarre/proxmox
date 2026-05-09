@@ -36,3 +36,20 @@ http:
         average: 10
         burst: 20
         period: 1m
+
+    # Allow search engine indexing — override le X-Robots-Tag posé par
+    # security-headers en le remplaçant par une directive positive. À
+    # chaîner APRÈS security-headers sur les routers publics qu'on veut
+    # voir dans Google (ex: rubis.pro). Les services privés (app.rubis.pro,
+    # gitea, grafana, supabase, uptime, headlamp, ntfy, minio, holyclaude,
+    # anydrop, wetalk) gardent juste security-headers et restent en
+    # noindex.
+    #
+    # Note : on remplace la valeur plutôt que de la supprimer (Traefik
+    # accepte officiellement `""` pour delete, mais le comportement varie
+    # selon les versions). Une valeur positive est plus explicite côté
+    # Google et plus robuste face aux montées de version Traefik.
+    allow-indexing:
+      headers:
+        customResponseHeaders:
+          X-Robots-Tag: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
